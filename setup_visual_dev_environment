@@ -1,0 +1,90 @@
+#SingleInstance,Force ;ensure only 1 version running
+SetTitleMatchMode, 2 ;to make sure winMinimize and Sending Control C to ConsoleWindowClass works down below
+DetectHiddenWindows,On ;Added becauase minimizing the window
+
+; General Documentation := https://ffmpeg.org/ffmpeg-devices.html#gdigrab  Documentation on gdigrab from ffmpeg
+; Get list of devices ffmpeg:= ffmpeg -list_devices true -f dshow -i dummy
+; Cropping specific area := https://stackoverflow.com/questions/6766333/capture-windows-screen-with-ffmpeg/47591299
+;********************Control+Shift+R=Start Recording***********************************
+
+
+
+;sleep, 200
+
+SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
+Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
+Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+W := Mon2Width * 0.5 ;
+SysGet, BoundingCoordinates, MonitorWorkArea ; 
+ResolutionWidth := BoundingCoordinatesRight - BoundingCoordinatesLeft ; 
+ResolutionHeight := BoundingCoordinatesBottom - BoundingCoordinatesTop ; 
+
+run "C:\Program Files\Google\Chrome Beta\Application\chrome.exe" --new-window "https://app.powerbi.com/groups/me/reports/9db74f74-ce11-4fa4-a2fb-497c7b5ed269/ReportSection"
+WinWait Power BI - Google Chrome
+WinRestore Power BI - Google Chrome
+
+WinActivate, Power BI - Google Chrome 
+WinMove, Power BI - Google Chrome , , Mon2Left+W, Mon2Top, W, Mon2Height ; Move the window to the calculated coordinates.
+sleep 500 ; 
+Send {LWin Down}{Up}{LWin Up}
+sleep 500 ; 
+Send {LWin Down}{Right}{LWin Up}
+
+
+
+run "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe" C:\Users\310267217\CustomPowerBIVisualDevelopment\circleCard
+; WinMinimize ahk_exe devenv.exe
+WinWait circleCard - Microsoft Visual Studio (Administrator)
+
+WinActivate, circleCard - Microsoft Visual Studio (Administrator) ;
+WinMove, circleCard - Microsoft Visual Studio (Administrator) , , Mon2Left, Mon2Top, W, Mon2Height ; Move the window to the calculated coordinates.
+
+
+
+sleep 25000 ; 
+Send {LControl Down}{``}{LControl Up}
+;ControlSend, , `, circleCard - Microsoft Visual Studio (Administrator) ;
+sleep 2000 ; 
+Send pbiviz start
+Send, {Enter}
+sleep 2000 ; 
+
+
+Send {LWin Down}{Up}{LWin Up}
+sleep 500 ; 
+Send {LWin Down}{Up}{LWin Up}
+sleep 500 ; 
+Send {LWin Down}{Left}{LWin Up}
+sleep 500 ; 
+Send, {Enter}
+sleep 15000
+; edit and set to visual developer icon
+WinActivate, KPI Tutorial - Power BI - Google Chrome ahk_class Chrome_WidgetWin_1
+Click, 364, 160 Left, Down
+Sleep, 78
+Click, 364, 160 Left, Up
+Sleep, 2375
+Click, 394, 326 Left, Down
+Sleep, 78
+Click, 394, 326 Left, Up
+Sleep, 3079
+Click, 235, 269 Left, Down
+Sleep, 93
+Click, 235, 269 Left, Up
+Sleep, 2328
+Click, 690, 463 Left, Down
+Sleep, 94
+Click, 690, 463 Left, Up
+Sleep, 3156
+Click, 186, 364 Left, Down
+Sleep, 110
+Click, 186, 364 Left, Up
+Sleep, 3406
+Click, 192, 208 Left, Down
+Sleep, 109
+Click, 192, 208 Left, Up
+Send {F12}
+
+return
+
+
