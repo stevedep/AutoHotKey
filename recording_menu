@@ -1,0 +1,74 @@
+#SingleInstance,Force ;ensure only 1 version running
+SetTitleMatchMode, 2 ;to make sure winMinimize and Sending Control C to ConsoleWindowClass works down below
+DetectHiddenWindows,On ;Added becauase minimizing the window
+
+; General Documentation := https://ffmpeg.org/ffmpeg-devices.html#gdigrab  Documentation on gdigrab from ffmpeg
+; Get list of devices ffmpeg:= ffmpeg -list_devices true -f dshow -i dummy
+; Cropping specific area := https://stackoverflow.com/questions/6766333/capture-windows-screen-with-ffmpeg/47591299
+;********************Control+Shift+R=Start Recording***********************************
+
+
+
+;sleep, 200
+
+Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
+Gui Add, Button, x18 y143 w159 h30, &OK
+Gui Font, s13
+Gui Add, Text, x25 y17 w400 h23, Make a screen recording
+Gui Font
+Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
+
+Gui Show, w620 h420, Window
+Return
+
+
+GuiEscape:
+GuiClose:
+ExitApp
+
+ButtonOK:
+Gui, Submit,
+;MsgBox %ShowBanner%
+
+SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
+Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
+Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+W := Mon2Width * 0.5 ;
+
+generalsettings 	= -y -rtbufsize 900M 
+webcamenaudio		= -f dshow -i video="Integrated Camera":audio="Headset Microphone (2- Plantronics Blackwire 315.1)" ; input 0 - webcam & audio
+audio			= -f dshow -i audio="Headset Microphone (2- Plantronics Blackwire 315.1)" ; input 0 - webcam & audio
+desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
+banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - banner
+codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
+filtercomplex 		= -filter_complex 
+volume 			:= "[0:a]volume=volume=12[amped];" ; amp volume 
+scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s];" ; scale webcam [0:v]->[s]
+overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
+overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [v2]
+
+if (ShowBanner= 1 and ShowWebcam=1) {
+	composefilter = "%volume%%scalewebcam%%overlaywebcam%;[webcam]%overlaybanner%"
+	out = -map "[banner]" -map "[amped]" "C:\Temp\test.mkv" ; select video output		
+	all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	
+} 
+else if (ShowBanner= 1 and ShowWebcam=0)
+{	
+	composefilter = "%volume%[1]%overlaybanner%"
+	out = -map "[banner]" -map "[amped]" "C:\Temp\test.mkv" ; select video output	
+	all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	
+}
+else {
+	composefilter = "%volume%%scalewebcam%%overlaywebcam%"
+	out = -map "[banner]" -map "[amped]" "C:\Temp\test.mkv" ; select video output
+	
+}
+
+
+Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+
+sleep 1000 ;
+WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
+return
