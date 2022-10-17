@@ -7,11 +7,80 @@ DetectHiddenWindows,On ;Added becauase minimizing the window
 ; Cropping specific area := https://stackoverflow.com/questions/6766333/capture-windows-screen-with-ffmpeg/47591299
 ;********************Control+Shift+R=Start Recording***********************************
 
+selectAudioCable() {
+	WinActivate, Echo | Microsoft Teams ahk_class Chrome_WidgetWin_1
+	Sleep, 333
+	Click, 1926, 35 Left, Down
+	Sleep, 100
+	Click, 1926, 35 Left, Up
+	Sleep, 100
+	Click, 2028, 34 Left, Down
+	Sleep, 100
+	Click, 2028, 34 Left, Up
+	Sleep, 100
+	Click, 1905, 90 Left, Down
+	Sleep, 100
+	Click, 1905, 90 Left, Up
+	Sleep, 100
+	Click, 769, 369 Left, Down
+	Sleep, 100
+	Click, 769, 369 Left, Up
+	Sleep, 100
+	Click, 1049, 353 Left, Down
+	Sleep, 100
+	Click, 1049, 353 Left, Up
+	Sleep, 100
+	Click, 1073, 482 Left, Down
+	Sleep, 100
+	Click, 1073, 482 Left, Up
+	Sleep, 100
+	Click, 1658, 125 Left, Down
+	Sleep, 100
+	Click, 1658, 125 Left, Up
+	Sleep, 100
+}
 
+setCableOutput(){	
+	WinActivate,  ahk_class Shell_TrayWnd
+	Sleep, 333
+	Click, 1788, 19 Right, Down
+	Sleep, 100
+	Click, 1788, 19 Right, Up
+	Sleep, 100
+	Click, 1740, 1009 Left, Down
+	Sleep, 100
+	Click, 1740, 1009 Left, Up
+	Sleep, 100
+	WinActivate, Sound ahk_class #32770
+	Sleep, 3000
+	Click, 96, 50 Left, Down
+	Sleep, 100
+	Click, 96, 50 Left, Up
+	Sleep, 100
+	Click, 126, 289 Left, Down
+	Sleep, 100
+	Click, 126, 289 Left, Up
+	Sleep, 100
+	Click, 126, 289 Left, Down
+	Sleep, 100
+	Click, 92, 213 Left, Up
+	Sleep, 100
+	WinActivate, CABLE Output Properties ahk_class #32770
+	Sleep, 333
+	Click, 82, 55 Left, Down
+	Sleep, 100
+	Click, 82, 55 Left, Up
+	Sleep, 100
+	Click, 243, 243 Left, Down
+	Sleep, 100
+	Click, 243, 243 Left, Up
+	Sleep, 100
+}
 
 ;sleep, 200
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
+Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, RecordScreen (Teams)
 Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)||
 
 Gui Add, Button, x18 y143 w159 h30, &Record
@@ -20,6 +89,8 @@ Gui Add, Text, x25 y17 w400 h23, Make a screen recording
 Gui Font
 Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
 Gui Add, Button, x18 y183 w159 h30, &Stop
+Gui Add, Button, x201 y183 w159 h30, SetCable&Output
+
 Gui Add, Button, x18 y223 w159 h30, &Test
 
 Gui Show, w620 h420, Window
@@ -29,9 +100,29 @@ GuiEscape:
 GuiClose:
 ExitApp
 
+ButtonSetCableOutput:
+setCableOutput() ; 
+return
+
 ButtonTest:
 Gui, Submit, ; 
-MsgBox, , , %DDLItems% ; 
+
+if WinExist("Temp ahk_class CabinetWClass") {
+	 
+	WinActivate , Temp ahk_class CabinetWClass ; 
+} else {
+	
+	Run % "explorer /expand, C:\Temp\" ; 
+}
+
+/*
+if (RecordScreen = 1) {
+	audioMap				:= "[mix]"
+	selectAudioCable() ;
+} else {
+	audioMap				:= "[amped]"
+}
+*/
 Gui, Show ; 
 Return ; 
 
@@ -47,6 +138,14 @@ if (New_File_Name = "") or (Error = 1) ;If you don't give it a name, it won't re
 	return 
 
 FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
+Gui, Show
+if WinExist("Temp ahk_class CabinetWClass") {
+	
+	WinActivate , Temp ahk_class CabinetWClass ; 
+} else {
+	
+	Run % "explorer /expand, C:\Temp\" ; 
+}
 
 Return
 
@@ -63,40 +162,84 @@ generalsettings 	= -y -rtbufsize 900M
 webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
 audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
 desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
-banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - banner
+banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
+systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
 codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
 filtercomplex 		= -filter_complex 
 volume 			:= "[0:a]volume=volume=12[amped]" 	; amp volume 
 scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
 overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
 overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
+if (RecordScreen = 1) {
+	audioMap				:= "[mix]"
+	selectAudioCable() ;
+	Sleep, 2000 ; 
+} else {
+	audioMap				:= "[amped]"
+}
 
 if (ShowBanner= 1 and ShowWebcam=1) {
-	composefilter = "%volume%;%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner%" ; input for overlay banner is webcam
-	out = -map "[banner]" -map "[amped]" "C:\Temp\temp.mkv" ; select video output		
-	all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	composefilter = %volume%;%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
+	if (RecordScreen = 1) {
+		composefilter = "%composefilter%;[amped][3]amix[mix]"
+	} else {
+		composefilter = "%composefilter%"
+	}
+	
+	out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
+	if (RecordScreen = 1) {
+		all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+	} else {
+		all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	}
+	
 	
 } 
 else if (ShowBanner= 1 and ShowWebcam=0)
 {	
-	composefilter = "%volume%;[1]%overlaybanner%" ; input for overlay banner is 1 (screen)
-	out = -map "[banner]" -map "[amped]" "C:\Temp\temp.mkv" ; select video output	
-	all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	composefilter = %volume%;[1]%overlaybanner% ; input for overlay banner is 1 (screen)
+	if (RecordScreen = 1) {
+		composefilter = "%composefilter%;[amped][3]amix[mix]"
+	} else {
+		composefilter = "%composefilter%"
+	}
+	
+	out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
+	if (RecordScreen = 1) {
+		all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+	} else {
+		all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	}	
 	
 }
 else { ; todo
-	composefilter = "%volume%"
-	out = -map "1" -map "[amped]" "C:\Temp\temp.mkv" ; select video output
-	all = %generalsettings% %audio% %desktop% %codec% %filtercomplex% %composefilter% %out%
+	composefilter = %volume%
+	if (RecordScreen = 1) {
+		composefilter = "%composefilter%;[amped][3]amix[mix]"
+	} else {
+		composefilter = "%composefilter%"
+	}
+	
+	out = -map "1" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output
+	
+	if (RecordScreen = 1) {
+		all = %generalsettings% %audio% %desktop% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+	} else {
+		all = %generalsettings% %audio% %desktop% %codec% %filtercomplex% %composefilter% %out%
+	}
 	
 }
 
 ; MsgBox %All% 
 Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 
+
 sleep 1000 ;
 WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
 Sleep 2000 ; 
 winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
+
 Gui Show
+
+
 return
