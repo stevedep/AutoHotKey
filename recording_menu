@@ -12,21 +12,28 @@ DetectHiddenWindows,On ;Added becauase minimizing the window
 ;sleep, 200
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)||
+
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
 Gui Add, Text, x25 y17 w400 h23, Make a screen recording
 Gui Font
 Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
 Gui Add, Button, x18 y183 w159 h30, &Stop
+Gui Add, Button, x18 y223 w159 h30, &Test
 
 Gui Show, w620 h420, Window
 Return
-
 
 GuiEscape:
 GuiClose:
 ExitApp
 
+ButtonTest:
+Gui, Submit, ; 
+MsgBox, , , %DDLItems% ; 
+Gui, Show ; 
+Return ; 
 
 ButtonStop:
 WinMaximize, C:\WINDOWS\system32\cmd.exe - C:\Temp\bin\ffmpeg ;
@@ -53,8 +60,8 @@ Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual heigh
 W := Mon2Width * 0.5 ;
 
 generalsettings 	= -y -rtbufsize 900M 
-webcamenaudio		= -f dshow -i video="Integrated Camera":audio="Headset Microphone (2- Plantronics Blackwire 315.1)" ; input 0 - webcam & audio
-audio			= -f dshow -i audio="Headset Microphone (2- Plantronics Blackwire 315.1)" ; input 0 - webcam & audio
+webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
+audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
 desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
 banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - banner
 codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
