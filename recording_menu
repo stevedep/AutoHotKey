@@ -105,38 +105,42 @@ selectAudioCable() {
 		Sleep, 100
 		Click, 243, 243 Left, Up
 		Sleep, 100
-	}
-	
-	
-	
+}
+
+
+
 ;sleep, 200
-	
-	Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
-	Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-	Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)||
-	Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
-	Gui Add, Button, x18 y143 w159 h30, &Record
-	Gui Font, s13
-	Gui Add, Text, x25 y17 w400 h23, Make a screen recording
-	Gui Font
-	Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
-	Gui Add, Button, x18 y183 w159 h30, &Stop
-	Gui Add, Button, x201 y183 w159 h30, SetCable&Output
-	
-	Gui Add, Button, x18 y223 w159 h30, &Test
-	
-	Gui Show, w620 h420, Window
-	Return
-	
-	GuiEscape:
-	GuiClose:
-	ExitApp
-	
-	ButtonSetCableOutput:
-	setCableOutput() ; 
-	return
-	
-	/*
+
+Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
+Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)||
+Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
+Gui Add, Button, x18 y143 w159 h30, &Record
+Gui Font, s13
+Gui Add, Text, x25 y17 w400 h23, Make a screen recording
+Gui Font
+Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
+Gui Add, Button, x18 y183 w159 h30, &Stop
+Gui Add, Button, x201 y183 w159 h30, SetCable&Output
+
+Gui Add, Button, x18 y223 w159 h30, &Test
+Gui Add, Button, x18 y263 w159 h30, &Compress
+
+Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
+
+
+Gui Show, w620 h420, Window
+Return
+
+GuiEscape:
+GuiClose:
+ExitApp
+
+ButtonSetCableOutput:
+setCableOutput() ; 
+return
+
+/*
 		Symbol	Key	Press	Release	Examples
 		^	{Ctrl}	{Ctrl down}	{Ctrl up}	Send "^{Home}" presses Ctrl+Home
 		+	{Shift}	{Shift down}	{Shift up}	Send "+abC" sends the text "AbC"
@@ -153,6 +157,17 @@ selectAudioCable() {
 ; WinGet, vCount, Count,  `| Microsoft Teams ahk_class Chrome_WidgetWin_1
 ; MsgBox, % vCount
 
+ButtonCompress:
+Gui, Submit ; 
+FileSelectFile, vFile ; 
+InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
+Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -vcodec libx265 -crf 28 %Path%%New_File_Name%.mp4
+
+sleep 1000 ;
+WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
+
+
+return ; 
 
 ButtonTest:
 ;	selectAudioCable() ; 
@@ -249,31 +264,28 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 		if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe") {
 			
 			WinActivate , Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe ; 
+			sleep 1000
 		} else {
 			
 			Run, C:\Program Files (x86)\Wondershare\Wondershare Filmora Scrn\FSEditor.exe
 			WinWaitActive Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe
-			
+			sleep 5000
 		}
-		sleep 5000
-		WinActivate, Wondershare Filmora Scrn
-		sleep 5000
 		CoordMode, Window
 		Click, 128, 12, left 
 		sleep 600 
 		Click, 128, 216, left
-		/*
 		sleep 600
 		send, c:\Temp\%New_File_Name%.mkv
 		sleep 1200
 		send, !o
-		sleep  9000
+		sleep  2000
 		Click, 205, 250 Left, , Down
 		Sleep, 300
 		Click, 58, 965 Left, , Up ; assuming full screen
-		Sleep, 300
+		Sleep, 900
 		Send, +z
-		*/
+	
 	}
 	
 	MsgBox done
@@ -362,7 +374,7 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 	}
 	
 ;	MsgBox %All% 
- Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+	Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 ;	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 	
 	sleep 1000 ;
