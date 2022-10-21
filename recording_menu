@@ -1,245 +1,397 @@
 #SingleInstance,Force ;ensure only 1 version running
 SetTitleMatchMode, 2 ;to make sure winMinimize and Sending Control C to ConsoleWindowClass works down below
 DetectHiddenWindows,On ;Added becauase minimizing the window
-
+SetWinDelay, 200 ; 
 ; General Documentation := https://ffmpeg.org/ffmpeg-devices.html#gdigrab  Documentation on gdigrab from ffmpeg
 ; Get list of devices ffmpeg:= ffmpeg -list_devices true -f dshow -i dummy
 ; Cropping specific area := https://stackoverflow.com/questions/6766333/capture-windows-screen-with-ffmpeg/47591299
 ;********************Control+Shift+R=Start Recording***********************************
-
+/*
+	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
+	MsgBox, % vCount
+*/
 selectAudioCable() {
-	WinActivate, Echo | Microsoft Teams ahk_class Chrome_WidgetWin_1
-	Sleep, 333
-	Click, 1926, 35 Left, Down
-	Sleep, 100
-	Click, 1926, 35 Left, Up
-	Sleep, 100
-	Click, 2028, 34 Left, Down
-	Sleep, 100
-	Click, 2028, 34 Left, Up
-	Sleep, 100
-	Click, 1905, 90 Left, Down
-	Sleep, 100
-	Click, 1905, 90 Left, Up
-	Sleep, 100
-	Click, 769, 369 Left, Down
-	Sleep, 100
-	Click, 769, 369 Left, Up
-	Sleep, 100
-	Click, 1049, 353 Left, Down
-	Sleep, 100
-	Click, 1049, 353 Left, Up
-	Sleep, 100
-	Click, 1073, 482 Left, Down
-	Sleep, 100
-	Click, 1073, 482 Left, Up
-	Sleep, 100
-	Click, 1658, 125 Left, Down
-	Sleep, 100
-	Click, 1658, 125 Left, Up
-	Sleep, 100
+	
+	SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
+	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
+	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+	W := Mon2Width * 0.5 ;
+	
+	; WinActivate, `| Microsoft Teams ahk_class Chrome_WidgetWin_1  ; 
+	; WinMove, , ,  0 , 0 ;
+	; sleep 1000 ; 
+	
+	 ; WinMove, `| Microsoft Teams ahk_class Chrome_WidgetWin_1 , , Mon2Left, Mon2Top, W*2, Mon2Height ; Move the window to the calculated coordinates.
+	
+	if WinExist("`| Microsoft Teams ahk_class Chrome_WidgetWin_1") {
+		WinActivate ; Use the window found by WinExist.
+		Sleep, 500 ; 
+		WinMove, , , 0 , 0 ;
+		Sleep, 500 ; 
+		WinMaximize ; 
+		Sleep, 500 ; 
+		
+		; WinActivate, ahk_class Chrome_WidgetWin_1
+		sleep 1000 ; 
+		MsgBox, 4, , Has the Teams window activated?, 15  ; 5-second timeout.
+		IfMsgBox, No
+			Return  ; User pressed the "No" button.
+		IfMsgBox, Timeout
+			Return ; i.e. Assume "No" if it timed out.
+		IfMsgBox, Yes	
+			Sleep, 333
+		Click, 1600, 30 Left, Down
+		Sleep, 300
+		Click, 1600, 30 Left, Up
+		Sleep, 300
+		Click, 1499, 102 Left, Down
+		Sleep, 300
+		Click, 1499, 102 Left, Up
+		Sleep, 300
+		Click, 601, 292 Left, Down
+		Sleep, 300
+		Click, 601, 292 Left, Up
+		Sleep, 300
+		Click, 907, 384 Left, Down
+		Sleep, 300
+		Click, 907, 383 Left, Up
+		Sleep, 300
+		Click, 875, 499 Left, Down
+		Sleep, 300
+		Click, 875, 499 Left, Up
+		Sleep, 300
+		Click, 1433, 56 Left, Down
+		Sleep, 300
+		Click, 1433, 56 Left, Up
+		Sleep, 300
+		Return ;
+	} else {
+		MsgBox not active
+	}
 }
-
-setCableOutput(){	
-	WinActivate,  ahk_class Shell_TrayWnd
-	Sleep, 333
-	Click, 1788, 19 Right, Down
-	Sleep, 100
-	Click, 1788, 19 Right, Up
-	Sleep, 100
-	Click, 1740, 1009 Left, Down
-	Sleep, 100
-	Click, 1740, 1009 Left, Up
-	Sleep, 100
-	WinActivate, Sound ahk_class #32770
-	Sleep, 3000
-	Click, 96, 50 Left, Down
-	Sleep, 100
-	Click, 96, 50 Left, Up
-	Sleep, 100
-	Click, 126, 289 Left, Down
-	Sleep, 100
-	Click, 126, 289 Left, Up
-	Sleep, 100
-	Click, 126, 289 Left, Down
-	Sleep, 100
-	Click, 92, 213 Left, Up
-	Sleep, 100
-	WinActivate, CABLE Output Properties ahk_class #32770
-	Sleep, 333
-	Click, 82, 55 Left, Down
-	Sleep, 100
-	Click, 82, 55 Left, Up
-	Sleep, 100
-	Click, 243, 243 Left, Down
-	Sleep, 100
-	Click, 243, 243 Left, Up
-	Sleep, 100
-}
-
+	
+	setCableOutput(){	
+		WinActivate,  ahk_class Shell_TrayWnd
+		Sleep, 333
+		Click, 1788, 19 Right, Down
+		Sleep, 100
+		Click, 1788, 19 Right, Up
+		Sleep, 100
+		Click, 1740, 1009 Left, Down
+		Sleep, 100
+		Click, 1740, 1009 Left, Up
+		Sleep, 100
+		WinActivate, Sound ahk_class #32770
+		Sleep, 3000
+		Click, 96, 50 Left, Down
+		Sleep, 100
+		Click, 96, 50 Left, Up
+		Sleep, 100
+		Click, 126, 289 Left, Down
+		Sleep, 100
+		Click, 126, 289 Left, Up
+		Sleep, 100
+		Click, 126, 289 Left, Down
+		Sleep, 100
+		Click, 92, 213 Left, Up
+		Sleep, 100
+		WinActivate, CABLE Output Properties ahk_class #32770
+		Sleep, 333
+		Click, 82, 55 Left, Down
+		Sleep, 100
+		Click, 82, 55 Left, Up
+		Sleep, 100
+		Click, 243, 243 Left, Down
+		Sleep, 100
+		Click, 243, 243 Left, Up
+		Sleep, 100
+	}
+	
+	
+	
 ;sleep, 200
+	
+	Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
+	Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
+	Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)||
+	Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
+	Gui Add, Button, x18 y143 w159 h30, &Record
+	Gui Font, s13
+	Gui Add, Text, x25 y17 w400 h23, Make a screen recording
+	Gui Font
+	Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
+	Gui Add, Button, x18 y183 w159 h30, &Stop
+	Gui Add, Button, x201 y183 w159 h30, SetCable&Output
+	
+	Gui Add, Button, x18 y223 w159 h30, &Test
+	
+	Gui Show, w620 h420, Window
+	Return
+	
+	GuiEscape:
+	GuiClose:
+	ExitApp
+	
+	ButtonSetCableOutput:
+	setCableOutput() ; 
+	return
+	
+	/*
+		Symbol	Key	Press	Release	Examples
+		^	{Ctrl}	{Ctrl down}	{Ctrl up}	Send "^{Home}" presses Ctrl+Home
+		+	{Shift}	{Shift down}	{Shift up}	Send "+abC" sends the text "AbC"
+		Send "!+a" presses Alt+Shift+A
+		!	{Alt}	{Alt down}	{Alt up}	Send "!a" presses Alt+A
+		#	{LWin}
+		{RWin}	{LWin down}
+		{RWin down}	{LWin up}
+		{RWin up}	Send "#e" holds down Win and then presses E
+		https://lexikos.github.io/v2/docs/commands/Send.htm
+		
+*/
 
-Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
-Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, RecordScreen (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)||
+; WinGet, vCount, Count,  `| Microsoft Teams ahk_class Chrome_WidgetWin_1
+; MsgBox, % vCount
 
-Gui Add, Button, x18 y143 w159 h30, &Record
-Gui Font, s13
-Gui Add, Text, x25 y17 w400 h23, Make a screen recording
-Gui Font
-Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
-Gui Add, Button, x18 y183 w159 h30, &Stop
-Gui Add, Button, x201 y183 w159 h30, SetCable&Output
-
-Gui Add, Button, x18 y223 w159 h30, &Test
-
-Gui Show, w620 h420, Window
-Return
-
-GuiEscape:
-GuiClose:
-ExitApp
-
-ButtonSetCableOutput:
-setCableOutput() ; 
-return
 
 ButtonTest:
-Gui, Submit, ; 
-
-if WinExist("Temp ahk_class CabinetWClass") {
-	 
-	WinActivate , Temp ahk_class CabinetWClass ; 
+;	selectAudioCable() ; 
+if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe") {
+	msgbox bestaat ; 
+	WinGet, vWinList, List, Wondershare Filmora Scrn ahk_class Qt5QWindowIcon
+	Loop, % vWinList
+	{
+		hWnd := vWinList%A_Index%
+		WinGetTitle, vWinTitle, % "ahk_id " hWnd
+		WinGetClass, vWinClass, % "ahk_id " hWnd
+		WinGet, vPName, ProcessName, % "ahk_id " hWnd
+	;WinGet, vPID, PID, % "ahk_id " hWnd
+		
+		WinGet, vWinStyle, Style, % "ahk_id " hWnd
+		
+		; WinActivate %vWinTitle% ; 
+		MsgBox % vWinStyle " " vWinTitle " " vWinClass " " vPName 
+	; WinGet TID, ID,ahk_exe Teams.exe
+	; WinActivate ahk_id %TID%
+	}
 } else {
+	Run, C:\Program Files (x86)\Wondershare\Wondershare Filmora Scrn\FSEditor.exe
+	WinWaitActive Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe
+	msgbox geladen ; 
 	
-	Run % "explorer /expand, C:\Temp\" ; 
-}
-
-/*
-if (RecordScreen = 1) {
-	audioMap				:= "[mix]"
-	selectAudioCable() ;
-} else {
-	audioMap				:= "[amped]"
-}
-*/
-Gui, Show ; 
-Return ; 
-
-ButtonStop:
-WinMaximize, C:\WINDOWS\system32\cmd.exe - C:\Temp\bin\ffmpeg ;
-Sleep 500 ; 
-WinActivate, C:\WINDOWS\system32\cmd.exe - C:\Temp\bin\ffmpeg ;
-Sleep, 300 ; 
-Send q ; 
-sleep, 500
-InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
-if (New_File_Name = "") or (Error = 1) ;If you don't give it a name, it won't rename it and won't run it
-	return 
-
-FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
-Gui, Show
-if WinExist("Temp ahk_class CabinetWClass") {
 	
-	WinActivate , Temp ahk_class CabinetWClass ; 
-} else {
-	
-	Run % "explorer /expand, C:\Temp\" ; 
 }
-
-Return
-
-ButtonRecord:
-Gui, Submit,
+	/*
+	sleep 3000
+		WinActivate, Wondershare Filmora Scrn
+		sleep 1000
+		CoordMode, Window
+		Click, 128, 12, left 
+		sleep 600 
+		Click, 128, 216, left
+		sleep 600
+		send, C:\Temp\HotReloadParcelSafeWrite.mkv
+		sleep 1200
+		send, !o
+		sleep  4000
+		Click, 205, 250 Left, , Down
+		Sleep, 300
+		Click, 58, 965 Left, , Up ; assuming full screen
+		Sleep, 300
+		Send, +z
+	*/
+	/*
+		Gui, Submit, ; 
+		
+		if WinExist("Temp ahk_class CabinetWClass") {
+			
+			WinActivate , Temp ahk_class CabinetWClass ; 
+		} else {
+			
+			Run % "explorer /expand, C:\Temp\" ; 
+		}
+		
+		/*
+		if (RecordScreen = 1) {
+			audioMap				:= "[mix]"
+			selectAudioCable() ;
+		} else {
+			audioMap				:= "[amped]"
+		}
+		
+		Gui, Show ; 
+	*/
+	Return ; 
+	
+	ButtonStop:
+	Gui, Submit ; 
+	WinMaximize, C:\WINDOWS\system32\cmd.exe - C:\Temp\bin\ffmpeg ;
+	Sleep 500 ; 
+	WinActivate, C:\WINDOWS\system32\cmd.exe - C:\Temp\bin\ffmpeg ;
+	Sleep, 300 ; 
+	Send q ; 
+	sleep, 500
+	InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
+	if (New_File_Name = "") or (Error = 1) ;If you don't give it a name, it won't rename it and won't run it
+		return 
+	
+	FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
+	Gui, Show
+	if WinExist("Temp ahk_class CabinetWClass") {
+		
+		WinActivate , Temp ahk_class CabinetWClass ; 
+	} else {
+		
+		Run % "explorer /expand, C:\Temp\" ; 
+	}
+	
+	if (Editor = 1) {
+		if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe") {
+			
+			WinActivate , Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe ; 
+		} else {
+			
+			Run, C:\Program Files (x86)\Wondershare\Wondershare Filmora Scrn\FSEditor.exe
+			WinWaitActive Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe
+			
+		}
+		sleep 5000
+		WinActivate, Wondershare Filmora Scrn
+		sleep 5000
+		CoordMode, Window
+		Click, 128, 12, left 
+		sleep 600 
+		Click, 128, 216, left
+		/*
+		sleep 600
+		send, c:\Temp\%New_File_Name%.mkv
+		sleep 1200
+		send, !o
+		sleep  9000
+		Click, 205, 250 Left, , Down
+		Sleep, 300
+		Click, 58, 965 Left, , Up ; assuming full screen
+		Sleep, 300
+		Send, +z
+		*/
+	}
+	
+	MsgBox done
+	
+	Return
+	
+	ButtonRecord:
+	Gui, Submit,
 ;MsgBox %ShowBanner%
-
-SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
-Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
-Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
-W := Mon2Width * 0.5 ;
-
-generalsettings 	= -y -rtbufsize 900M 
-webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
-audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
-desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
-banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
-systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
-codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
-filtercomplex 		= -filter_complex 
-volume 			:= "[0:a]volume=volume=12[amped]" 	; amp volume 
-scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
-overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
-overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
-if (RecordScreen = 1) {
-	audioMap				:= "[mix]"
-	selectAudioCable() ;
-	Sleep, 2000 ; 
-} else {
-	audioMap				:= "[amped]"
-}
-
-if (ShowBanner= 1 and ShowWebcam=1) {
-	composefilter = %volume%;%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
+	
+	SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
+	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
+	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+	W := Mon2Width * 0.5 ;
+	
+	generalsettings 	= -y -rtbufsize 900M 
+	webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
+	audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
+	desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
+	banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
+	systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
+	codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
+	filtercomplex 		= -filter_complex 
+	volume 			:= "[0:a]volume=volume=12[amped]" 	; amp volume 
+	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
+	overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
+	overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
 	if (RecordScreen = 1) {
-		composefilter = "%composefilter%;[amped][3]amix[mix]"
+		audioMap				:= "[mix]"
+		selectAudioCable() ;
+		Sleep, 2000 ; 
 	} else {
-		composefilter = "%composefilter%"
+		audioMap				:= "[amped]"
 	}
 	
-	out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
-	if (RecordScreen = 1) {
-		all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-	} else {
-		all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+	if (ShowBanner= 1 and ShowWebcam=1) {
+		composefilter = %volume%;%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
+		if (RecordScreen = 1) {
+			composefilter = "%composefilter%;[amped][3]amix[mix]"
+		} else {
+			composefilter = "%composefilter%"
+		}
+		
+		out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
+		if (RecordScreen = 1) {
+			all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+		} else {
+			all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+		}
+		
+		
+	} 
+	else if (ShowBanner= 1 and ShowWebcam=0)
+	{	
+		composefilter = %volume%;[1]%overlaybanner% ; input for overlay banner is 1 (screen)
+		if (RecordScreen = 1) {
+			composefilter = "%composefilter%;[amped][3]amix[mix]"
+		} else {
+			composefilter = "%composefilter%"
+		}
+		
+		out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
+		if (RecordScreen = 1) {
+			all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+		} else {
+			all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+		}	
+		
+	}
+	else { ; todo
+		composefilter = %volume%
+		if (RecordScreen = 1) {
+			composefilter = "%composefilter%;[amped][3]amix[mix]"
+		} else {
+			composefilter = "%composefilter%"
+		}
+		
+		out = -map "1" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output
+		
+		if (RecordScreen = 1) {
+			all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+		} else {
+			all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+		}
+		
 	}
 	
+;	MsgBox %All% 
+ Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+;	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 	
-} 
-else if (ShowBanner= 1 and ShowWebcam=0)
-{	
-	composefilter = %volume%;[1]%overlaybanner% ; input for overlay banner is 1 (screen)
-	if (RecordScreen = 1) {
-		composefilter = "%composefilter%;[amped][3]amix[mix]"
-	} else {
-		composefilter = "%composefilter%"
-	}
+	sleep 1000 ;
+	WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
+	Sleep 2000 ; 
+	winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
 	
-	out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
-	if (RecordScreen = 1) {
-		all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-	} else {
-		all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-	}	
+	Gui Show
 	
-}
-else { ; todo
-	composefilter = %volume%
-	if (RecordScreen = 1) {
-		composefilter = "%composefilter%;[amped][3]amix[mix]"
-	} else {
-		composefilter = "%composefilter%"
-	}
 	
-	out = -map "1" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output
+	return
 	
-	if (RecordScreen = 1) {
-		all = %generalsettings% %audio% %desktop% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-	} else {
-		all = %generalsettings% %audio% %desktop% %codec% %filtercomplex% %composefilter% %out%
-	}
 	
-}
-
-; MsgBox %All% 
-Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
-
-
-sleep 1000 ;
-WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
-Sleep 2000 ; 
-winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
-
-Gui Show
-
-
-return
+	^.::
+	CoordMode, Mouse
+	Send, ^b
+	Sleep 1200
+	Send, {Up}
+	Sleep 1200
+	Send, {Up}
+	sleep, 1200
+	Click, -50, 0, Left, Relative  
+	sleep, 1200
+	Send, ^b
+	sleep, 1200
+	Send, {Delete}
+	sleep, 1200
+	Click, 50, 0, Left, , Down, Relative
+	sleep, 1200
+	Click, -200, 0, Left, , Up, Relative
+	
+	return
