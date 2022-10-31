@@ -10,6 +10,8 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
+#Include Rufaydium-Webdriver-RufaydiumV1.7.1\Rufaydium.ahk
+
 selectAudioCable() {
 	
 	SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
@@ -124,10 +126,10 @@ Gui Add, Button, x18 y183 w159 h30, &Stop
 Gui Add, Button, x201 y183 w159 h30, SetCable&Output
 
 Gui Add, Button, x18 y223 w159 h30, &Test
+Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube||
 Gui Add, Button, x18 y263 w159 h30, &Compress
-
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
-
+Gui Add, Button, x18 y303 w159 h30, &Upload
 
 Gui Show, w620 h420, Window
 Return
@@ -157,6 +159,78 @@ return
 ; WinGet, vCount, Count,  `| Microsoft Teams ahk_class Chrome_WidgetWin_1
 ; MsgBox, % vCount
 
+ButtonUpload:
+Gui, Submit ; 
+FileSelectFile, vFile ; 
+Chrome := new Rufaydium("chromedriver.exe")
+
+chrome.capabilities.setUserProfile("Default")
+
+Page := Chrome.NewSession()
+; navigate to url
+Page.Navigate("https://www.youtube.com/upload")
+
+; document.querySelector("#select-files-button.style-scope").click()
+e := Page.QuerySelector("#select-files-button.style-scope")
+e.click(0)
+sleep, 1000
+send, %vFile%
+sleep, 500 
+send, !o
+sleep, 500 
+
+
+; document.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK")[0].click()
+while !Page.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK") ; [0].click()
+	sleep, 500
+Page.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK")[0].click()
+; msgbox % t.Count()
+sleep, 500
+; document.getElementById("next-button").click()
+Page.getElementById("next-button").click()
+
+
+return
+/*
+
+
+run "C:\Program Files\Google\Chrome Beta\Application\chrome.exe" --new-window "https://www.youtube.com"
+WinWait  YouTube - Google Chrome ahk_class Chrome_WidgetWin_1 ; ; 
+
+if (WinExist("YouTube - Google Chrome ahk_class Chrome_WidgetWin_1")) {
+	WinActivate ; 
+	WinRestore ; 
+	sleep, 500 ;
+	WinMove, , , 0, 0 ; Move the window to the calculated coordinates.	
+	sleep, 500 ; 	
+	WinMaximize , YouTube - Google Chrome ahk_class Chrome_WidgetWin_1
+	
+	sleep, 2000 ; 
+	CoordMode Pixel  ; Interprets the coordinates below as relative to the screen rather than the active window.
+	ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, *Icon3 %A_ProgramFiles%\SomeApp\SomeApp.exe
+	if (ErrorLevel = 2)
+		MsgBox Could not conduct the search.
+	else if (ErrorLevel = 1)
+		MsgBox Icon could not be found on the screen.
+	else
+		MsgBox The icon was found at %FoundX%x%FoundY%.
+	
+		sleep, 2500 ; 
+		CoordMode, Window
+		Click, 1726, 120, left 
+		sleep 600 
+		Click, 1600, 180, left 
+		sleep 600 
+		WinWait  Kanaalcontent - YouTube Studio - Google Chrome ahk_class Chrome_WidgetWin_1 ;
+		sleep 600
+		Click, 950, 700, left 
+	
+	
+	
+}
+return ; 
+*/
+
 ButtonCompress:
 Gui, Submit ; 
 FileSelectFile, vFile ; 
@@ -171,6 +245,11 @@ return ;
 
 ButtonTest:
 ;	selectAudioCable() ; 
+Gui, Submit
+if (DDLCodecOptions = "YouTube") {
+	MsgBox youtube ;
+}
+	/*
 if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe") {
 	msgbox bestaat ; 
 	WinGet, vWinList, List, Wondershare Filmora Scrn ahk_class Qt5QWindowIcon
@@ -196,6 +275,7 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 	
 	
 }
+*/
 	/*
 	sleep 3000
 		WinActivate, Wondershare Filmora Scrn
@@ -236,6 +316,7 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 		
 		Gui, Show ; 
 	*/
+	Gui, Show ; 
 	Return ; 
 	
 	ButtonStop:
@@ -285,7 +366,7 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 		Click, 58, 965 Left, , Up ; assuming full screen
 		Sleep, 900
 		Send, +z
-	
+		
 	}
 	
 	MsgBox done
@@ -307,7 +388,11 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 	desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
 	banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
 	systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
-	codec 			= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p 
+	if (DDLCodecOptions = "YouTube") {
+		codec 		= -c:v libx265 -crf 20 ;
+	} else {
+		codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
+	}
 	filtercomplex 		= -filter_complex 
 	volume 			:= "[0:a]volume=volume=12[amped]" 	; amp volume 
 	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
