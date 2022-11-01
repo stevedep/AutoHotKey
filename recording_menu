@@ -14,9 +14,9 @@ SetWinDelay, 200 ;
 
 selectAudioCable() {
 	
-	SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
-	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
-	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+	SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
+	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
+	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 	W := Mon2Width * 0.5 ;
 	
 	; WinActivate, `| Microsoft Teams ahk_class Chrome_WidgetWin_1  ; 
@@ -115,7 +115,7 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)||
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)|
 Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
@@ -130,6 +130,9 @@ Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube||
 Gui Add, Button, x18 y263 w159 h30, &Compress
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
 Gui Add, Button, x18 y303 w159 h30, &Upload
+Gui Add, Button, x18 y343 w159 h30, &Exit
+Gui Add, Button, x201 y343 w159 h30, Test&2
+
 
 Gui Show, w620 h420, Window
 Return
@@ -137,6 +140,9 @@ Return
 GuiEscape:
 GuiClose:
 ExitApp
+
+
+
 
 ButtonSetCableOutput:
 setCableOutput() ; 
@@ -159,16 +165,149 @@ return
 ; WinGet, vCount, Count,  `| Microsoft Teams ahk_class Chrome_WidgetWin_1
 ; MsgBox, % vCount
 
+ButtonExit:
+Chrome := new Rufaydium("chromedriver.exe")
+Chrome.QuitAllSessions() ; close all Page 
+Chrome.Driver.Exit() ; then exits driver
+Sleep 1000
+ExitApp
+Return
+
+ButtonTest2:
+; clipboard := "https://youtube.com/embed/" + spl[spl.Length()]
+Chrome := new Rufaydium("chromedriver.exe")
+ses := Chrome.getPages()
+ msgbox % ses.Length() 
+if (ses.Length() > 0) {		
+	Page := Chrome.getPage(1) 
+} else {
+	Chrome.capabilities.setUserProfile("Default")
+	Page := Chrome.NewPage()
+}
+
+Page.NewTab()	
+Page.Navigate("https://www.protopage.com/stevedep#General/Way_of_working_--%3E")
+Page.ActiveTab()	
+; MsgBox, 4096,, Continue after selecting the right tab, then paste the clipboard into the webpage config
+js = 
+(
+var xpath = "//div[text()='Add widgets']";
+var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+matchingElement.parentElement.click()
+)
+Page.CDP.evaluate(js)
+
+js = 
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+		}
+
+		var xpath = "//div[text()='Web page']";
+		var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var node = matchingElement.closest("div > div")
+		triggerMouseEvent(node, "mousedown")
+)
+Page.CDP.evaluate(js)
+/*
+
+
+while !Page.querySelector("div[id^=new]") ; [0].click()
+	sleep, 500
+*/
+js=
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelector("div[id^=new]")
+
+triggerMouseEvent(node.childNodes[0], "mousedown")
+triggerMouseEvent(node.childNodes[0], "mouseup")
+)
+Page.CDP.evaluate(js)
+
+js=
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelector("div[id^=new]").querySelector("a")
+
+triggerMouseEvent(node, "mousedown")
+
+)
+Page.CDP.evaluate(js)
+
+url := "https://youtube.com/embed/" + spl[spl.Length()]
+
+js=
+(
+r = document.querySelectorAll("div[id^=new]")
+r[1].querySelector(" div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > input").value = '%url%'
+
+)
+Page.CDP.evaluate(js)
+
+js=
+(
+	
+function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelectorAll("div[id^=new]")[1].querySelector("div:nth-child(3) > span")
+
+node.click()
+
+)
+Page.CDP.evaluate(js)
+
+
+gui, show
+return ; 
+
+
+; if (ses.Length() > )
+; chrome.capabilities.setUserProfile("Default")
+; Page := Chrome.NewPage()
+
+; navigate to url
+
+
+
+return 
+
 ButtonUpload:
 Gui, Submit ; 
-FileSelectFile, vFile ; 
 Chrome := new Rufaydium("chromedriver.exe")
+ses := Chrome.getSessions()
+msgbox % ses.Length() 
 
-chrome.capabilities.setUserProfile("Default")
+FileSelectFile, vFile ; 
 
-Page := Chrome.NewSession()
+if (ses.Length() > 0) {		
+	Page := Chrome.getSession(1) 
+} else {
+	Chrome.capabilities.setUserProfile("Default")
+	Page := Chrome.NewSession()
+
+}
+
+Page.NewTab()	
 ; navigate to url
 Page.Navigate("https://www.youtube.com/upload")
+Page.ActiveTab()	
 
 ; document.querySelector("#select-files-button.style-scope").click()
 e := Page.QuerySelector("#select-files-button.style-scope")
@@ -179,7 +318,6 @@ sleep, 500
 send, !o
 sleep, 500 
 
-
 ; document.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK")[0].click()
 while !Page.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK") ; [0].click()
 	sleep, 500
@@ -188,7 +326,116 @@ Page.getElementsByName("VIDEO_MADE_FOR_KIDS_NOT_MFK")[0].click()
 sleep, 500
 ; document.getElementById("next-button").click()
 Page.getElementById("next-button").click()
+sleep, 800
+Page.getElementById("next-button").click()
+sleep, 800
+Page.getElementById("next-button").click()
+sleep, 1000
+Page.getElementsByName("PRIVATE")[0].click()
+sleep, 800
+Page.querySelector("ytcp-icon-button.video-url-fadeable.style-scope.ytcp-video-info").click()
+sleep, 800
+Page.getElementById("done-button").click()
+sleep, 800
+while !Page.querySelector("#close-button.style-scope.ytcp-uploads-still-processing-dialog") 
+	sleep, 500
+Page.querySelector("#close-button.style-scope.ytcp-uploads-still-processing-dialog").click()
 
+Page.NewTab()	
+Page.Navigate("https://www.protopage.com/stevedep#General/Way_of_working_--%3E")
+Page.ActiveTab()	
+; MsgBox, 4096,, Continue after selecting the right tab, then paste the clipboard into the webpage config
+js = 
+(
+var xpath = "//div[text()='Add widgets']";
+var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+matchingElement.parentElement.click()
+)
+Page.CDP.evaluate(js)
+
+js = 
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+		}
+
+		var xpath = "//div[text()='Web page']";
+		var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var node = matchingElement.closest("div > div")
+		triggerMouseEvent(node, "mousedown")
+)
+Page.CDP.evaluate(js)
+/*
+
+
+while !Page.querySelector("div[id^=new]") ; [0].click()
+	sleep, 500
+*/
+js=
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelector("div[id^=new]")
+
+triggerMouseEvent(node.childNodes[0], "mousedown")
+triggerMouseEvent(node.childNodes[0], "mouseup")
+)
+Page.CDP.evaluate(js)
+
+js=
+(
+	function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelector("div[id^=new]").querySelector("a")
+
+triggerMouseEvent(node, "mousedown")
+
+)
+Page.CDP.evaluate(js)
+spl := strSplit(clipboard, "/")
+
+url := "https://youtube.com/embed/" + spl[spl.Length()]
+
+js=
+(
+r = document.querySelectorAll("div[id^=new]")
+r[1].querySelector(" div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > input").value = '%url%'
+
+)
+Page.CDP.evaluate(js)
+
+js=
+(
+	
+function triggerMouseEvent (node, eventType) {
+		var clickEvent = document.createEvent ('MouseEvents');
+		clickEvent.initEvent (eventType, true, true);
+		node.dispatchEvent (clickEvent);
+	}
+
+node = document.querySelectorAll("div[id^=new]")[1].querySelector("div:nth-child(3) > span")
+
+node.click()
+
+)
+Page.CDP.evaluate(js)
+
+Gui, show
+; document.getElementById("next-button").click()
+; document.getElementById("next-button").click()
+; document.getElementsByName("UNLISTED")[0].click()
+; document.querySelector("ytcp-icon-button.video-url-fadeable.style-scope.ytcp-video-info").click()
+; document.querySelector("#close-button.style-scope.ytcp-video-share-dialog").click()
 
 return
 /*
@@ -243,81 +490,16 @@ WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
 
 return ; 
 
-ButtonTest:
-;	selectAudioCable() ; 
-Gui, Submit
-if (DDLCodecOptions = "YouTube") {
-	MsgBox youtube ;
-}
-	/*
-if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe") {
-	msgbox bestaat ; 
-	WinGet, vWinList, List, Wondershare Filmora Scrn ahk_class Qt5QWindowIcon
-	Loop, % vWinList
-	{
-		hWnd := vWinList%A_Index%
-		WinGetTitle, vWinTitle, % "ahk_id " hWnd
-		WinGetClass, vWinClass, % "ahk_id " hWnd
-		WinGet, vPName, ProcessName, % "ahk_id " hWnd
-	;WinGet, vPID, PID, % "ahk_id " hWnd
-		
-		WinGet, vWinStyle, Style, % "ahk_id " hWnd
-		
-		; WinActivate %vWinTitle% ; 
-		MsgBox % vWinStyle " " vWinTitle " " vWinClass " " vPName 
-	; WinGet TID, ID,ahk_exe Teams.exe
-	; WinActivate ahk_id %TID%
-	}
-} else {
-	Run, C:\Program Files (x86)\Wondershare\Wondershare Filmora Scrn\FSEditor.exe
-	WinWaitActive Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.exe
-	msgbox geladen ; 
+	ButtonTest:
+	Chrome := new Rufaydium("chromedriver.exe")
+	 Clipboard := json.dump(Chrome.getPages()) 
+	ses := Chrome.Pages() 
 	
-	
-}
-*/
-	/*
-	sleep 3000
-		WinActivate, Wondershare Filmora Scrn
-		sleep 1000
-		CoordMode, Window
-		Click, 128, 12, left 
-		sleep 600 
-		Click, 128, 216, left
-		sleep 600
-		send, C:\Temp\HotReloadParcelSafeWrite.mkv
-		sleep 1200
-		send, !o
-		sleep  4000
-		Click, 205, 250 Left, , Down
-		Sleep, 300
-		Click, 58, 965 Left, , Up ; assuming full screen
-		Sleep, 300
-		Send, +z
-	*/
-	/*
-		Gui, Submit, ; 
-		
-		if WinExist("Temp ahk_class CabinetWClass") {
-			
-			WinActivate , Temp ahk_class CabinetWClass ; 
-		} else {
-			
-			Run % "explorer /expand, C:\Temp\" ; 
-		}
-		
-		/*
-		if (RecordScreen = 1) {
-			audioMap				:= "[mix]"
-			selectAudioCable() ;
-		} else {
-			audioMap				:= "[amped]"
-		}
-		
-		Gui, Show ; 
-	*/
-	Gui, Show ; 
-	Return ; 
+	; Clipboard := json.dump(Chrome.getPage(1)) 
+	Page := Chrome.getPage(1) 
+	Page.NewTab()
+	gui, show
+	return ; 
 	
 	ButtonStop:
 	Gui, Submit ; 
@@ -328,7 +510,7 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 	Send q ; 
 	sleep, 500
 	InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
-	if (New_File_Name = "") or (Error = 1) ;If you don't give it a name, it won't rename it and won't run it
+	if (New_File_Name = "") or (Error = 1) ;If you don"t give it a name, it won"t rename it and won"t run it
 		return 
 	
 	FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
@@ -377,9 +559,9 @@ if WinExist("Wondershare Filmora Scrn ahk_class Qt5QWindowIcon ahk_exe FSEditor.
 	Gui, Submit,
 ;MsgBox %ShowBanner%
 	
-	SysGet, Mon2, Monitor, 2 ; Get the second monitor's details
-	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor's actual width.
-	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor's actual height.
+	SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
+	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
+	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 	W := Mon2Width * 0.5 ;
 	
 	generalsettings 	= -y -rtbufsize 900M 
