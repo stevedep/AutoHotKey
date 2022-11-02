@@ -585,7 +585,7 @@ return ;
 		codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
 	}
 	filtercomplex 		= -filter_complex 
-	volume 			= "[0:a]volume=volume=%VolumeBoost%[amped]" 	; amp volume 
+	volume 			= [0:a]volume=volume=%VolumeBoost%[amped] 	; amp volume 
 	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
 	overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
 	overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
@@ -621,7 +621,7 @@ return ;
 		
 		
 	} 
-	else if (ShowBanner= 1 and ShowWebcam=0)
+	else if (ShowBanner= 1 and ShowWebcam=0) ; todo testen
 	{	
 		composefilter = %volume%;[1]%overlaybanner% ; input for overlay banner is 1 (screen)
 		if (RecordScreen = 1) {
@@ -638,7 +638,25 @@ return ;
 		}	
 		
 	}
+	else if (ShowBanner= 0 and ShowWebcam=1)
+	{	
+		composefilter = %volume%;%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
+		if (RecordScreen = 1) {
+			composefilter = "%composefilter%;[amped][3]amix[mix]"
+		} else {
+			composefilter = "%composefilter%"
+		}
+		
+		out = -map "[webcam]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
+		if (RecordScreen = 1) {
+			all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+		} else {
+			all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+		}		
+		
+	}
 	else { ; todo
+	msgbox overig
 		composefilter = %volume%
 		if (RecordScreen = 1) {
 			composefilter = "%composefilter%;[amped][3]amix[mix]"
@@ -658,7 +676,7 @@ return ;
 	
 ;	MsgBox %All% 
 	Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
-;	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 	
 	sleep 1000 ;
 	WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
