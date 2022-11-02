@@ -29,12 +29,12 @@ selectAudioCable() {
 		WinActivate ; Use the window found by WinExist.
 		Sleep, 500 ; 
 		WinMove, , , 0 , 0 ;
-		Sleep, 500 ; 
+		Sleep, 1000 ; 
 		WinMaximize ; 
 		Sleep, 500 ; 
 		
 		; WinActivate, ahk_class Chrome_WidgetWin_1
-		sleep 1000 ; 
+	
 		MsgBox, 4, , Has the Teams window activated?, 15  ; 5-second timeout.
 		IfMsgBox, No
 			Return  ; User pressed the "No" button.
@@ -42,30 +42,31 @@ selectAudioCable() {
 			Return ; i.e. Assume "No" if it timed out.
 		IfMsgBox, Yes	
 			Sleep, 333
+		CoordMode, Window
 		Click, 1600, 30 Left, Down
-		Sleep, 300
+		Sleep, 500
 		Click, 1600, 30 Left, Up
-		Sleep, 300
+		Sleep, 600
 		Click, 1499, 102 Left, Down
-		Sleep, 300
+		Sleep, 600
 		Click, 1499, 102 Left, Up
-		Sleep, 300
+		Sleep, 600
 		Click, 601, 292 Left, Down
-		Sleep, 300
+		Sleep, 100
 		Click, 601, 292 Left, Up
-		Sleep, 300
-		Click, 907, 384 Left, Down
-		Sleep, 300
-		Click, 907, 383 Left, Up
-		Sleep, 300
-		Click, 875, 499 Left, Down
-		Sleep, 300
-		Click, 875, 499 Left, Up
-		Sleep, 300
+		Sleep, 600
+		Click, 907, 280 Left, Down
+		Sleep, 100
+		Click, 907, 280 Left, Up
+		Sleep, 600
+		Click, 875, 406 Left, Down
+		Sleep, 100
+		Click, 875, 406 Left, Up
+		Sleep, 600
 		Click, 1433, 56 Left, Down
-		Sleep, 300
+		Sleep, 100
 		Click, 1433, 56 Left, Up
-		Sleep, 300
+		Sleep, 600
 		Return ;
 	} else {
 		MsgBox not active
@@ -78,35 +79,35 @@ selectAudioCable() {
 		Click, 1788, 19 Right, Down
 		Sleep, 100
 		Click, 1788, 19 Right, Up
-		Sleep, 100
+		Sleep, 400
 		Click, 1740, 1009 Left, Down
 		Sleep, 100
 		Click, 1740, 1009 Left, Up
-		Sleep, 100
+		Sleep, 400
 		WinActivate, Sound ahk_class #32770
 		Sleep, 3000
 		Click, 96, 50 Left, Down
 		Sleep, 100
 		Click, 96, 50 Left, Up
-		Sleep, 100
-		Click, 126, 289 Left, Down
-		Sleep, 100
-		Click, 126, 289 Left, Up
-		Sleep, 100
-		Click, 126, 289 Left, Down
-		Sleep, 100
-		Click, 92, 213 Left, Up
-		Sleep, 100
+		Sleep, 400
+		Click, 126, 224 Left, Down
+		Sleep, 50
+		Click, 126, 224 Left, Up
+		Sleep, 50
+		Click, 126, 224 Left, Down
+		Sleep, 50
+		Click, 92, 224 Left, Up
+		Sleep, 400
 		WinActivate, CABLE Output Properties ahk_class #32770
 		Sleep, 333
 		Click, 82, 55 Left, Down
 		Sleep, 100
 		Click, 82, 55 Left, Up
-		Sleep, 100
+		Sleep, 400
 		Click, 243, 243 Left, Down
 		Sleep, 100
 		Click, 243, 243 Left, Up
-		Sleep, 100
+		
 }
 
 
@@ -116,6 +117,9 @@ selectAudioCable() {
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
 Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLMonitors x531 y62 w150, Primary Monitor||Secondary Monitor|
+Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
+Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 6
 Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
@@ -134,7 +138,7 @@ Gui Add, Button, x18 y343 w159 h30, &Exit
 Gui Add, Button, x201 y343 w159 h30, Test&2
 
 
-Gui Show, w620 h420, Window
+Gui Show, w720 h420, Window
 Return
 
 GuiEscape:
@@ -560,6 +564,7 @@ return ;
 ;MsgBox %ShowBanner%
 	
 	SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
+	SysGet, Mon1, Monitor, 1 ; Get the second monitor"s details
 	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
 	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 	W := Mon2Width * 0.5 ;
@@ -567,7 +572,11 @@ return ;
 	generalsettings 	= -y -rtbufsize 900M 
 	webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
 	audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
-	desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
+	if (DDLMonitors = "Primary Monitor") {
+		desktop 			= -f gdigrab -video_size %Mon1Right%x%Mon1Bottom% -i desktop ; input 1 - screen
+	} else {
+		desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
+	}
 	banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
 	systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
 	if (DDLCodecOptions = "YouTube") {
@@ -576,14 +585,21 @@ return ;
 		codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
 	}
 	filtercomplex 		= -filter_complex 
-	volume 			:= "[0:a]volume=volume=12[amped]" 	; amp volume 
+	volume 			= "[0:a]volume=volume=%VolumeBoost%[amped]" 	; amp volume 
 	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
 	overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
 	overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
 	if (RecordScreen = 1) {
 		audioMap				:= "[mix]"
-		selectAudioCable() ;
-		Sleep, 2000 ; 
+		MsgBox, 4, , Select Audio Cable?, 15  ; 5-second timeout.
+		
+		IfMsgBox, Timeout
+			Return ; i.e. Assume "No" if it timed out.
+		IfMsgBox, Yes	
+			selectAudioCable() ;		
+			Sleep, 2000 ; 
+		
+
 	} else {
 		audioMap				:= "[amped]"
 	}
