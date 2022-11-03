@@ -119,7 +119,7 @@ Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
 Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)|
 Gui Add, DropDownList, vDDLMonitors x531 y62 w150, Primary Monitor||Secondary Monitor|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
-Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 6
+Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 3
 Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
@@ -130,7 +130,7 @@ Gui Add, Button, x18 y183 w159 h30, &Stop
 Gui Add, Button, x201 y183 w159 h30, SetCable&Output
 
 Gui Add, Button, x18 y223 w159 h30, &Test
-Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube||
+Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube|
 Gui Add, Button, x18 y263 w159 h30, &Compress
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
 Gui Add, Button, x18 y303 w159 h30, &Upload
@@ -296,9 +296,19 @@ ButtonUpload:
 Gui, Submit ; 
 Chrome := new Rufaydium("chromedriver.exe")
 ses := Chrome.getSessions()
-msgbox % ses.Length() 
+; msgbox % ses.Length() 
 
 FileSelectFile, vFile ; 
+InputBox, VideoDesc, Video description, Please provide a description, , 640, 100
+if ErrorLevel {
+    MsgBox, CANCEL was pressed.
+	return ; 
+}
+else {
+    MsgBox, You entered "%VideoDesc%"
+}
+
+
 
 if (ses.Length() > 0) {		
 	Page := Chrome.getSession(1) 
@@ -415,6 +425,11 @@ js=
 r = document.querySelectorAll("div[id^=new]")
 r[1].querySelector(" div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > input").value = '%url%'
 
+)
+Page.CDP.evaluate(js)
+js=
+(
+document.querySelectorAll("div[id^=new]")[1].querySelector("input[value=Untitled]").value = '%VideoDesc%'
 )
 Page.CDP.evaluate(js)
 
