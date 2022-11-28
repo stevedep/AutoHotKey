@@ -130,10 +130,11 @@ Gui Add, Button, x18 y183 w159 h30, &Stop
 Gui Add, Button, x201 y183 w159 h30, SetCable&Output
 
 Gui Add, Button, x18 y223 w159 h30, &Test
-Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube|
+Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless|YouTube||
 Gui Add, Button, x18 y263 w159 h30, &Compress
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
 Gui Add, Button, x18 y303 w159 h30, &Upload
+Gui Add, Button, x201 y303 w159 h30, &Upload_Stream
 Gui Add, Button, x18 y343 w159 h30, &Exit
 Gui Add, Button, x201 y343 w159 h30, Test&2
 
@@ -291,6 +292,110 @@ return ;
 
 
 return 
+
+ButtonUpload_Stream:
+Gui, Submit ; 
+Chrome := new Rufaydium("chromedriver.exe")
+ses := Chrome.getSessions()
+; msgbox % ses.Length() 
+
+FileSelectFile, vFile ; 
+
+if (ses.Length() > 0) {		
+	Page := Chrome.getSession(1) 
+} else {
+	Chrome.capabilities.setUserProfile("Default")
+	Page := Chrome.NewSession()
+
+}
+
+Page.NewTab()	
+; navigate to url
+Page.Navigate("https://web.microsoftstream.com/upload")
+Page.ActiveTab()	
+
+while !Page.QuerySelector("button.c-hyperlink") ; [0].click()
+	sleep, 500
+
+/*
+i := Page.QuerySelector("button.c-hyperlink")
+sleep, 500
+msgbox i
+i.click()
+*/
+js = 
+(
+	document.querySelector("button.c-hyperlink").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+send, %vFile%
+sleep 600
+send, !o
+
+while !Page.QuerySelector("v-pane-header.permissions-tab-header") ; [0].click()
+	sleep, 500
+js = 
+(
+	document.querySelector("v-pane-header.permissions-tab-header").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("div > video-edit-permissions-pane > div > div > label > input").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.stream-btn.btn-primary.dialog-confirm-button.ng-binding.ng-scope").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.stream-btn.stream-btn.accordion-action-button.share-button").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.stream-btn.btn-primary.ng-binding.ng-isolate-scope").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.stream-btn.stream-btn.close-button.only-close-button.ng-binding").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.stream-btn.stream-btn.close-button.only-close-button.ng-binding").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("input.search-field.action-list-item.principal-group-search-field.ng-pristine.ng-untouched.ng-valid.ng-empty.ng-valid-maxlength").value = "ChurnAnalytics"
+	document.querySelector("button[name=principal-group-search-button]").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+
+msgbox halle
+return
+
 
 ButtonUpload:
 Gui, Submit ; 
@@ -671,7 +776,7 @@ return ;
 		
 	}
 	else { ; todo
-	msgbox overig
+	
 		composefilter = %volume%
 		if (RecordScreen = 1) {
 			composefilter = "%composefilter%;[amped][3]amix[mix]"
