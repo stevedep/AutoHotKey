@@ -386,11 +386,43 @@ sleep 600
 
 js = 
 (
-	document.querySelector("input.search-field.action-list-item.principal-group-search-field.ng-pristine.ng-untouched.ng-valid.ng-empty.ng-valid-maxlength").value = "ChurnAnalytics"
-	document.querySelector("button[name=principal-group-search-button]").click()
+	document.querySelector("div.selector").click()
 )
 Page.CDP.evaluate(js)
 sleep 600
+
+js = 
+(
+	document.querySelector('div[aria-label^="My"]').click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+/*
+
+
+js = 
+(
+	document.querySelector("input.search-field.action-list-item.principal-group-search-field.ng-pristine.ng-untouched.ng-valid.ng-empty.ng-valid-maxlength").value  ='ChurnAnalytics'
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.c-glyph.principal-group-search-button").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+
+js = 
+(
+	document.querySelector("button.c-glyph.principal-group-search-button").click()
+)
+Page.CDP.evaluate(js)
+sleep 600
+*/
+
+
 
 
 msgbox halle
