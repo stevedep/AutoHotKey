@@ -116,11 +116,12 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
 Gui Add, DropDownList, vDDLMonitors x531 y62 w150, Primary Monitor||Secondary Monitor|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
 Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 3
-Gui Add, CheckBox, vEditor x201 y143 w200 h23, Send to Editor
+Gui Add, CheckBox, vEditor x201 y143 w100 h23, Send to Editor
+Gui Add, CheckBox, vStatement x300 y143 w200 h23, GenerateStatement
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
 Gui Add, Text, x25 y17 w400 h23, Make a screen recording
@@ -136,10 +137,14 @@ Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualD
 Gui Add, Button, x18 y303 w159 h30, &Upload
 Gui Add, Button, x201 y303 w159 h30, &Upload_Stream
 Gui Add, Button, x18 y343 w159 h30, &Exit
+Gui Font, s12
+Gui Add, Text, x25 y384 w400 h23, Don't forget to Exit!!
+Gui Font
 Gui Add, Button, x201 y343 w159 h30, Test&2
+Gui Add, Edit, vGenerateText x201 y385 w500 h200, Test&2
 
 
-Gui Show, w720 h420, Window
+Gui Show, w720 h620, Window
 Return
 
 GuiEscape:
@@ -177,6 +182,7 @@ Chrome.Driver.Exit() ; then exits driver
 Sleep 1000
 ExitApp
 Return
+
 
 ButtonTest2:
 ; clipboard := "https://youtube.com/embed/" + spl[spl.Length()]
@@ -827,6 +833,14 @@ return ;
 	}
 	
 ;	MsgBox %All% 
+	if (Statement=1) {
+		Gui, Submit, NoHide
+		guiControlGet,  GenerateText       ;you can simply use the edit control's v-name as the output variable
+		thisurl = %ComSpec% /k C:\Temp\bin\ffmpeg %all% 
+		guiControl,,GenerateText, %thisurl%    ;now set the url back to the control
+		Gui, Show
+	
+	} else {
 	Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
 	
@@ -836,7 +850,7 @@ return ;
 	winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
 	
 	Gui Show
-	
+	}
 	
 	return
 	
