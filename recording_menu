@@ -776,9 +776,9 @@ return ;
 				composefilter = "%composefilter%"
 			}
 			if (Split=1) {
-				out = -map "[banner]" -map "[mix]"   "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+				out = -map "[banner]" -map "[mix]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
 			} else {
-				out = -map "[banner]" -map "[out2]"   "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+				out = -map "[banner]" -map "[out2]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
 			}
 			
 			
@@ -830,20 +830,39 @@ return ;
 	}
 	else if (ShowBanner= 0 and ShowWebcam=1)
 	{	
-		composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
-		if (RecordScreen = 1) {
-			composefilter = "%composefilter%;[amped][3]amix[mix]"
+		if (Split=1) {
+			composefilter = %volume%,asplit=2[out1][out2] ; input for overlay banner is webcam
+			if (RecordScreen = 1) {
+				composefilter = "%composefilter%;[out1][3]amix[mix]"
+			} else {
+				composefilter = "%composefilter%"
+			}
 		} else {
-			composefilter = "%composefilter%"
+			composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
+			if (RecordScreen = 1) {
+				composefilter = "%composefilter%;[amped][3]amix[mix]"
+			} else {
+				composefilter = "%composefilter%"
+			}
+			
+			
+	}	
+		if (Split=1) {
+			if (RecordScreen=1) {
+				out = -map "1:v" -map "[mix]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+			} else {
+				out = -map "1:v" -map "[out1]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+			}
+			
+		} else {		
+			out = -map "[webcam]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
 		}
 		
-		out = -map "[webcam]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
 		if (RecordScreen = 1) {
 			all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
 		} else {
 			all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-		}		
-		
+		}	
 	}
 	else { ; todo
 	
