@@ -120,18 +120,19 @@ Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audi
 Gui Add, DropDownList, vDDLMonitors x531 y62 w150, Primary Monitor||Secondary Monitor|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
 Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 3
-Gui Add, CheckBox, vEditor x201 y143 w100 h23, Send to Editor
+Gui Add, CheckBox, vEditor x201 y143 w90 h23, Send to Editor
 Gui Add, CheckBox, vStatement x300 y143 w200 h23, GenerateStatement
 Gui Add, Button, x18 y143 w159 h30, &Record
 Gui Font, s13
 Gui Add, Text, x25 y17 w400 h23, Make a screen recording
 Gui Font
-Gui Add, CheckBox, vShowWebcam x25 y98 w120 h23, Show Webcam
+Gui Add, CheckBox, vShowWebcam x25 y98 w90 h23, Show Webcam
+Gui Add, CheckBox, vSplit x120 y98 w60 h23, Split 
 Gui Add, Button, x18 y183 w159 h30, &Stop
 Gui Add, Button, x201 y183 w159 h30, SetCable&Output
 
 Gui Add, Button, x18 y223 w159 h30, &Test
-Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless|YouTube||
+Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube|
 Gui Add, Button, x18 y263 w159 h30, &Compress
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
 Gui Add, Button, x18 y303 w159 h30, &Upload
@@ -139,12 +140,12 @@ Gui Add, Button, x201 y303 w159 h30, &Upload_Stream
 Gui Add, Button, x18 y343 w159 h30, &Exit
 Gui Font, s12
 Gui Add, Text, x25 y384 w400 h23, Don't forget to Exit!!
-Gui Font
 Gui Add, Button, x201 y343 w159 h30, Test&2
-Gui Add, Edit, vGenerateText x201 y385 w500 h200, Test&2
+Gui Font, s13
+Gui Add, Edit, vGenerateText x201 y385 w700 h400, Test&2
 
 
-Gui Show, w720 h620, Window
+Gui Show, w920 h820, Window
 Return
 
 GuiEscape:
@@ -743,7 +744,7 @@ return ;
 		codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
 	}
 	filtercomplex 		= -filter_complex 
-	volume 			= [0:a]volume=volume=%VolumeBoost%[amped] 	; amp volume 
+	volume 			= [0:a]volume=volume=%VolumeBoost% 	; amp volume 
 	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
 	overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
 	overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
@@ -763,32 +764,48 @@ return ;
 	}
 	
 	if (ShowBanner= 1 and ShowWebcam=1) {
-		composefilter = %volume%;%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
-		if (RecordScreen = 1) {
-			composefilter = "%composefilter%;[amped][3]amix[mix]"
-		} else {
-			composefilter = "%composefilter%"
+		if (Split = 1) {
+			composefilter = %volume%,asplit=2[out1][out2];[1:v]%overlaybanner% ; input for overlay banner is the screenrecording 1:v
+			if (RecordScreen = 1) {
+				composefilter = "%composefilter%;[amped][3]amix[mix]"
+			} else {
+				composefilter = "%composefilter%"
+			}
+			
+			out = -map "[banner]" -map "[out1]"   "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+			
+			
+		}	else {
+			composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
+			if (RecordScreen = 1) {
+				composefilter = "%composefilter%;[amped][3]amix[mix]"
+			} else {
+				composefilter = "%composefilter%"
+			}
+			
+			out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
+			
 		}
-		
-		out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
 		if (RecordScreen = 1) {
-			all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-		} else {
-			all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-		}
-		
-		
+				all = %generalsettings% `` `n %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+			} else {
+				if (Statement =1) {
+				all = %generalsettings% `n %webcamenaudio%  `n %desktop%  `n %banner%  `n %codec%  `n %filtercomplex% %composefilter%  `n %out%
+				} else {
+					all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+				}
+			}
 	} 
 	else if (ShowBanner= 1 and ShowWebcam=0) ; todo testen
 	{	
-		composefilter = %volume%;[1]%overlaybanner% ; input for overlay banner is 1 (screen)
+		composefilter = %volume%[amped];[1]%overlaybanner% ; input for overlay banner is 1 (screen)
 		if (RecordScreen = 1) {
 			composefilter = "%composefilter%;[amped][3]amix[mix]"
 		} else {
 			composefilter = "%composefilter%"
 		}
 		
-		out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
+		out = -map "[banner]"  -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
 		if (RecordScreen = 1) {
 			all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
 		} else {
@@ -798,7 +815,7 @@ return ;
 	}
 	else if (ShowBanner= 0 and ShowWebcam=1)
 	{	
-		composefilter = %volume%;%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
+		composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
 		if (RecordScreen = 1) {
 			composefilter = "%composefilter%;[amped][3]amix[mix]"
 		} else {
@@ -815,7 +832,7 @@ return ;
 	}
 	else { ; todo
 	
-		composefilter = %volume%
+		composefilter = %volume%[amped]
 		if (RecordScreen = 1) {
 			composefilter = "%composefilter%;[amped][3]amix[mix]"
 		} else {
