@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-#Include Rufaydium-Webdriver-RufaydiumV1.7.1\Rufaydium.ahk
+#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
 
 selectAudioCable() {
 	
@@ -116,8 +116,9 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
-Gui Add, DropDownList, vDDLMonitors x531 y62 w150, Primary Monitor||Secondary Monitor|
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Realtek High Definition Audio(SST))||Microphone Array (Synaptics Audio)|Headset Microphone (2- Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLMonitors x511 y62 w150, Primary Monitor||Secondary Monitor|
+Gui Add, DropDownList, vDDLWebcams x675 y62 w160, USB Video Device||Microsoft Camera Front|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
 Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 3
 Gui Add, CheckBox, vEditor x201 y143 w90 h23, Send to Editor
@@ -729,7 +730,7 @@ return ;
 	W := Mon2Width * 0.5 ;
 	
 	generalsettings 	= -y -rtbufsize 900M 
-	webcamenaudio		= -f dshow -i video="Integrated Camera":audio="%DDLItems%" ; input 0 - webcam & audio
+	webcamenaudio		= -f dshow -i video="%DDLWebcams%":audio="%DDLItems%" ; input 0 - webcam & audio
 	audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
 	if (DDLMonitors = "Primary Monitor") {
 		desktop 			= -f gdigrab -video_size %Mon1Right%x%Mon1Bottom% -i desktop ; input 1 - screen
