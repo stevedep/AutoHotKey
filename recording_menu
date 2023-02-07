@@ -116,26 +116,29 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Realtek High Definition Audio(SST))||Microphone Array (Synaptics Audio)|Headset Microphone (2- Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
 Gui Add, DropDownList, vDDLMonitors x511 y62 w150, Primary Monitor||Secondary Monitor|
-Gui Add, DropDownList, vDDLWebcams x675 y62 w160, USB Video Device||Microsoft Camera Front|
+Gui Add, DropDownList, vDDLWebcams x675 y62 w160, Integrated Camera||USB Video Device|Microsoft Camera Front|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
 Gui, Add, Slider, x531 y112 w150 h20 vVolumeBoost ToolTipRight Range1-15 TickInterval1, 3
 Gui Add, CheckBox, vEditor x201 y143 w90 h23, Send to Editor
 Gui Add, CheckBox, vStatement x300 y143 w200 h23, GenerateStatement
-Gui Add, Button, x18 y143 w159 h30, &Record
+Gui Add, Button, x18 y143 w159 h30, &Create
 Gui Font, s13
-Gui Add, Text, x25 y17 w400 h23, Make a screen recording
+Gui Add, Text, x201 y17 w400 h23, Make a screen recording
+Gui Add, CheckBox, vSelectFiles x24 y17 w120 h23, Select Files
 Gui Font
 Gui Add, CheckBox, vShowWebcam x25 y98 w90 h23, Show Webcam
 Gui Add, CheckBox, vSplit x120 y98 w60 h23, Split 
 Gui Add, Button, x18 y183 w159 h30, &Stop
 Gui Add, Button, x201 y183 w159 h30, SetCable&Output
 
-Gui Add, Button, x18 y223 w159 h30, &Test
+Gui Add, Button, x18 y223 w159 h30, &ShowDevices
 Gui Add, DropDownList, vDDLCodecOptions x201 y223 w150, Lossless||YouTube|
 Gui Add, Button, x18 y263 w159 h30, &Compress
 Gui Add, Edit, vPath x201 y263 w400 h21, C:\Users\310267217\CustomPowerBIVisualDevelopment\dT\video\
+Gui Add, Button, vCrop x610 y263 w100 h30, Crop
+
 Gui Add, Button, x18 y303 w159 h30, &Upload
 Gui Add, Button, x201 y303 w159 h30, &Upload_Stream
 Gui Add, Button, x18 y343 w159 h30, &Exit
@@ -644,9 +647,26 @@ return ;
 
 ButtonCompress:
 Gui, Submit ; 
-FileSelectFile, vFile ; 
+FileSelectFile, vFile, , c:\Temp ; 
 InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
 Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -vcodec libx265 -crf 28 %Path%%New_File_Name%.mp4
+
+sleep 1000 ;
+WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
+
+ButtonCrop:
+Gui, Submit ; 
+FileSelectFile, vFile, , c:\Temp ; 
+if ErrorLevel {
+    MsgBox, CANCEL was pressed.
+	Gui,Show
+	return ; 
+}
+InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
+InputBox, Start,Start,When should the video start?,,300,130 ;Get a file name for your new video
+InputBox, Duration, Duration, How many seconds should be recorded?,,300,130 ;Get a file name for your new video
+
+Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w:in_h-40:0:0[cropped]" -map "[cropped]" -map 0:a -ss %Start% -t %Duration% -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
 
 sleep 1000 ;
 WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
@@ -654,15 +674,9 @@ WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
 
 return ; 
 
-	ButtonTest:
-	Chrome := new Rufaydium("chromedriver.exe")
-	 Clipboard := json.dump(Chrome.getPages()) 
-	ses := Chrome.Pages() 
+	ButtonShowDevices:
+	Run %ComSpec% /k C:\Temp\bin\ffmpeg -list_devices true -f dshow -i dummy
 	
-	; Clipboard := json.dump(Chrome.getPage(1)) 
-	Page := Chrome.getPage(1) 
-	Page.NewTab()
-	gui, show
 	return ; 
 	
 	ButtonStop:
@@ -719,192 +733,211 @@ return ;
 	
 	Return
 	
-	ButtonRecord:
-	Gui, Submit,
+
+
+	ButtonCreate:
+		Gui, Submit,
 ;MsgBox %ShowBanner%
 	
-	SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
-	SysGet, Mon1, Monitor, 1 ; Get the second monitor"s details
-	Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
-	Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
-	W := Mon2Width * 0.5 ;
-	
-	generalsettings 	= -y -rtbufsize 900M 
-	webcamenaudio		= -f dshow -i video="%DDLWebcams%":audio="%DDLItems%" ; input 0 - webcam & audio
-	audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
-	if (DDLMonitors = "Primary Monitor") {
-		desktop 			= -f gdigrab -video_size %Mon1Right%x%Mon1Bottom% -i desktop ; input 1 - screen
-	} else {
-		desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
-	}
-	banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
-	systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
-	if (DDLCodecOptions = "YouTube") {
-		codec 		= -c:v libx265 -crf 20 ;
-	} else {
-		codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
-	}
-	filtercomplex 		= -filter_complex 
-	volume 			= [0:a]volume=volume=%VolumeBoost% 	; amp volume 
-	scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
-	overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
-	overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
-	if (RecordScreen = 1) {
-		audioMap				:= "[mix]"
-		MsgBox, 4, , Select Audio Cable?, 15  ; 5-second timeout.
-		
-		IfMsgBox, Timeout
-			Return ; i.e. Assume "No" if it timed out.
-		IfMsgBox, Yes	
-			selectAudioCable() ;		
-			Sleep, 2000 ; 
-		
+		SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
+		SysGet, Mon1, Monitor, 1 ; Get the second monitor"s details
+		Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
+		Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
+		W := Mon2Width * 0.5 ;	
 
-	} else {
-		audioMap				:= "[amped]"
-	}
-	
-	if (ShowBanner= 1 and ShowWebcam=1) {
-		if (Split = 1) {
-			composefilter = %volume%,asplit=2[out1][out2];[1:v]%overlaybanner% ; input for overlay banner is the screenrecording 1:v
+		generalsettings 	= -y -rtbufsize 1500M 
+		InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
+		
+		if (SelectFiles=1) {			
+			FileSelectFile, vWebcam, , c:\Temp, Select Webcam file ; 
+			webcamenaudio		= -i %vWebcam% ; input 0 - webcam & audio
+
+		} else {
+			webcamenaudio		= -f dshow -i video="%DDLWebcams%":audio="%DDLItems%" ; input 0 - webcam & audio
+		}
+
+		
+		
+		audio			= -f dshow -i audio="%DDLItems%" ; input 0 - webcam & audio
+		
+		if (SelectFiles=1) {
+			FileSelectFile, vDesktop, , c:\Temp, Select desktop recording file ; 
+			desktop = -i %vDesktop% ;
+		} else {
+			if (DDLMonitors = "Primary Monitor") {
+				desktop 			= -f gdigrab -video_size %Mon1Right%x%Mon1Bottom% -i desktop ; input 1 - screen
+			} else {
+				desktop 			= -f gdigrab -offset_x %Mon2Left% -offset_y %Mon2Top% -video_size %Mon2Width%x%Mon2Height% -i desktop ; input 1 - screen
+			}
+		}
+
+		banner 			= -i "C:\Temp\Banner_Visual_Development.png" ; input 2 - 
+		systemaudio 		= -f dshow -i audio="CABLE Output (VB-Audio Virtual Cable)" ; input 3
+		if (DDLCodecOptions = "YouTube") {
+			codec 		= -c:v libx265 -crf 20 ;
+		} else {
+			codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
+		}
+		filtercomplex 		= -filter_complex 
+		volume 			= [0:a]volume=volume=%VolumeBoost% 	; amp volume 
+		scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s]
+		overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
+		overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
+		if (RecordScreen = 1) {
+			audioMap				:= "[mix]"
+			MsgBox, 4, , Select Audio Cable?, 15  ; 5-second timeout.
+			
+			IfMsgBox, Timeout
+				Return ; i.e. Assume "No" if it timed out.
+			IfMsgBox, Yes	
+				selectAudioCable() ;		
+				Sleep, 2000 ; 
+			
+
+		} else {
+			audioMap				:= "[amped]"
+		}
+		
+		if (ShowBanner= 1 and ShowWebcam=1) {
+			if (Split = 1) {
+				composefilter = %volume%,asplit=2[out1][out2];[1:v]%overlaybanner% ; input for overlay banner is the screenrecording 1:v
+				if (RecordScreen = 1) {
+					if (Split = 1) {
+						composefilter = "%composefilter%;[out1][3]amix[mix]"
+					} else {
+						composefilter = "%composefilter%;[amped][3]amix[mix]"
+					}
+				} else {
+					composefilter = "%composefilter%"
+				}
+				if (Split=1) {
+					out = -map "[banner]" -map "[mix]" "C:\Temp\%New_File_Name%.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+				} else {
+					out = -map "[banner]" -map "[out2]" "C:\Temp\%New_File_Name%.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+				}
+				
+				
+				
+			}	else {
+				composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
+				if (RecordScreen = 1) {
+					composefilter = "%composefilter%;[amped][3]amix[mix]"
+				} else {
+					composefilter = "%composefilter%"
+				}
+				
+				out = -map "[banner]" -map "%audioMap%" "C:\Temp\%New_File_Name%.mkv" ; select video output		
+				
+			}
+			if (RecordScreen = 1) { ; bij recordscreen heb je een extra input Audio Cable en mix je die met voice. 
+			
+					if (Statement =1)  { 
+						all = %generalsettings% `n %webcamenaudio% `n %desktop% `n %banner% `n %systemaudio% `n %codec% `n %filtercomplex%  %composefilter% `n %out% 
+					} else {
+					all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out% 
+				}
+					} else {
+						if (Statement =1) {
+						all = %generalsettings% `n %webcamenaudio% `n %desktop% `n %banner% `n %codec% `n %filtercomplex% %composefilter% `n %out%
+						} else {
+							all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+						}
+					}
+
+
+		} 
+		else if (ShowBanner= 1 and ShowWebcam=0) ; todo testen
+		{	
+			composefilter = %volume%[amped];[1]%overlaybanner% ; input for overlay banner is 1 (screen)
 			if (RecordScreen = 1) {
-				if (Split = 1) {
+				composefilter = "%composefilter%;[amped][3]amix[mix]"
+			} else {
+				composefilter = "%composefilter%"
+			}
+			
+			out = -map "[banner]"  -map "%audioMap%" "C:\Temp\%New_File_Name%.mkv" ; select video output	
+			if (RecordScreen = 1) {
+				all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+			} else {
+				all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+			}	
+			
+		}
+		else if (ShowBanner= 0 and ShowWebcam=1)
+		{	
+			if (Split=1) {
+				composefilter = %volume%,asplit=2[out1][out2] ; input for overlay banner is webcam
+				if (RecordScreen = 1) {
 					composefilter = "%composefilter%;[out1][3]amix[mix]"
 				} else {
+					composefilter = "%composefilter%"
+				}
+			} else {
+				composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
+				if (RecordScreen = 1) {
 					composefilter = "%composefilter%;[amped][3]amix[mix]"
+				} else {
+					composefilter = "%composefilter%"
 				}
-			} else {
-				composefilter = "%composefilter%"
-			}
+				
+				
+		}	
 			if (Split=1) {
-				out = -map "[banner]" -map "[mix]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
-			} else {
-				out = -map "[banner]" -map "[out2]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
-			}
-			
-			
-			
-		}	else {
-			composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam%;[webcam]%overlaybanner% ; input for overlay banner is webcam
-			if (RecordScreen = 1) {
-				composefilter = "%composefilter%;[amped][3]amix[mix]"
-			} else {
-				composefilter = "%composefilter%"
-			}
-			
-			out = -map "[banner]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output		
-			
-		}
-		if (RecordScreen = 1) { ; bij recordscreen heb je een extra input Audio Cable en mix je die met voice. 
-		
-				if (Statement =1)  { 
-					all = %generalsettings% `n %webcamenaudio% `n %desktop% `n %banner% `n %systemaudio% `n %codec% `n %filtercomplex%  %composefilter% `n %out% 
+				if (RecordScreen=1) {
+					out = -map "1:v" -map "[mix]" "C:\Temp\%New_File_Name%.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
 				} else {
-				all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out% 
-			}
-				} else {
-					if (Statement =1) {
-					all = %generalsettings% `n %webcamenaudio% `n %desktop% `n %banner% `n %codec% `n %filtercomplex% %composefilter% `n %out%
-					} else {
-						all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-					}
+					out = -map "1:v" -map "[out1]" "C:\Temp\%New_File_Name%.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
 				}
-
-
-	} 
-	else if (ShowBanner= 1 and ShowWebcam=0) ; todo testen
-	{	
-		composefilter = %volume%[amped];[1]%overlaybanner% ; input for overlay banner is 1 (screen)
-		if (RecordScreen = 1) {
-			composefilter = "%composefilter%;[amped][3]amix[mix]"
-		} else {
-			composefilter = "%composefilter%"
-		}
-		
-		out = -map "[banner]"  -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
-		if (RecordScreen = 1) {
-			all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-		} else {
-			all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-		}	
-		
-	}
-	else if (ShowBanner= 0 and ShowWebcam=1)
-	{	
-		if (Split=1) {
-			composefilter = %volume%,asplit=2[out1][out2] ; input for overlay banner is webcam
-			if (RecordScreen = 1) {
-				composefilter = "%composefilter%;[out1][3]amix[mix]"
-			} else {
-				composefilter = "%composefilter%"
+				
+			} else {		
+				out = -map "[webcam]" -map "%audioMap%" "C:\Temp\%New_File_Name%.mkv" ; select video output	
 			}
-		} else {
-			composefilter = %volume%[amped];%scalewebcam%;%overlaywebcam% ; input for overlay banner is webcam
+			
+			if (RecordScreen = 1) {
+				all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+			} else {
+				all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
+			}	
+		}
+		else { ; todo
+		
+			composefilter = %volume%[amped]
 			if (RecordScreen = 1) {
 				composefilter = "%composefilter%;[amped][3]amix[mix]"
 			} else {
 				composefilter = "%composefilter%"
 			}
 			
+			out = -map "1" -map "%audioMap%" "C:\Temp\%New_File_Name%.mkv" ; select video output
 			
-	}	
-		if (Split=1) {
-			if (RecordScreen=1) {
-				out = -map "1:v" -map "[mix]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+			if (RecordScreen = 1) {
+				all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
 			} else {
-				out = -map "1:v" -map "[out1]" "C:\Temp\temp.mkv" -map "0:v" -map "[out2]" "C:\Temp\webcam.mkv"
+				all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
 			}
 			
-		} else {		
-			out = -map "[webcam]" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output	
 		}
 		
-		if (RecordScreen = 1) {
-			all = %generalsettings% %webcamenaudio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
+	;	MsgBox %All% 
+		if (Statement=1) {
+			Gui, Submit, NoHide
+			guiControlGet,  GenerateText       ;you can simply use the edit control's v-name as the output variable
+			thisurl = %ComSpec% /k C:\Temp\bin\ffmpeg %all% 
+			guiControl,,GenerateText, %thisurl%    ;now set the url back to the control
+			Gui, Show
+		
 		} else {
-			all = %generalsettings% %webcamenaudio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-		}	
-	}
-	else { ; todo
-	
-		composefilter = %volume%[amped]
-		if (RecordScreen = 1) {
-			composefilter = "%composefilter%;[amped][3]amix[mix]"
-		} else {
-			composefilter = "%composefilter%"
+		Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+		Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
+		
+		sleep 1000 ;
+		WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
+		Sleep 2000 ; 
+		winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
+		
+		Gui Show
 		}
-		
-		out = -map "1" -map "%audioMap%" "C:\Temp\temp.mkv" ; select video output
-		
-		if (RecordScreen = 1) {
-			all = %generalsettings% %audio% %desktop% %banner% %systemaudio% %codec% %filtercomplex% %composefilter% %out%
-		} else {
-			all = %generalsettings% %audio% %desktop% %banner% %codec% %filtercomplex% %composefilter% %out%
-		}
-		
-	}
-	
-;	MsgBox %All% 
-	if (Statement=1) {
-		Gui, Submit, NoHide
-		guiControlGet,  GenerateText       ;you can simply use the edit control's v-name as the output variable
-		thisurl = %ComSpec% /k C:\Temp\bin\ffmpeg %all% 
-		guiControl,,GenerateText, %thisurl%    ;now set the url back to the control
-		Gui, Show
-	
-	} else {
-	Run %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
-	Clipboard = %ComSpec% /k C:\Temp\bin\ffmpeg %all% ;
-	
-	sleep 1000 ;
-	WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
-	Sleep 2000 ; 
-	winMinimize, ahk_class ConsoleWindowClass ;minimize the CMD window
-	
-	Gui Show
-	}
-	
-	return
+		return
 	
 	
 	^.::
