@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-#Include Rufaydium-Webdriver-RufaydiumV1.7.1\Rufaydium.ahk
+#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
 
 selectAudioCable() {
 	
@@ -689,17 +689,10 @@ if ErrorLevel {
 InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
 InputBox, wBlocks,wBlocks, xth blocks from Width?,,300,130 ;Get a file name for your new video
 InputBox, hBlocks, hBlocks, xth blocks from Height?,,300,130 ;Get a file name for your new video
-MsgBox, 4,, Would you like to continue? (press Yes or No)
-IfMsgBox Yes
-    MsgBox You pressed Yes.
-IfMsgBox, No
-    MsgBox You pressed No.
-return ;
 
-MsgBox, 4, , Limit Duration?, 15  ; 5-second timeout.	
-IfMsgBox, Timeout
-	Return ; i.e. Assume "No" if it timed out.
-IfMsgBox, Yes
+MsgBox, 4,, Limit Duration?  ; 5-second timeout.
+IfMsgBox Yes 
+{
 	InputBox, Start,Start,When should the video start?,,300,130 ;Get a file name for your new video
 	InputBox, Duration, Duration, How many seconds should be recorded?,,300,130 ;Get a file name for your new video
 
@@ -707,16 +700,12 @@ IfMsgBox, Yes
 	; https://video.stackexchange.com/questions/4563/how-can-i-crop-a-video-with-ffmpeg
 	; -r is de framerate
 	; https://ffmpeg.org/ffmpeg-all.html#Video-Options
-	Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w:in_h-40:0:0[cropped]" -map "[cropped]" -map 0:a -ss %Start% -t %Duration% -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
-	Return 
-IfMsgBox, No
-	Gui, Submit, NoHide
-		guiControlGet,  GenerateText       ;you can simply use the edit control's v-name as the output variable
-		thisurl = %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w-(in_w*(in_w/%wBlocks%)):in_h-(in_h*(in_h/%hBlocks%))[cropped]" -map "[cropped]" -map 0:a -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
-		guiControl,,GenerateText, %thisurl%    ;now set the url back to the control
-		Gui, Show
-	; Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w-(in_w*(in_w/%wBlocks%)):in_h-(in_h*(in_h/%hBlocks%))[cropped]" -map "[cropped]" -map 0:a -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
-	Return
+	Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w-(in_w/%wBlocks%):in_h-(in_h/%hBlocks%)[cropped]" -map "[cropped]" -map 0:a -ss %Start% -t %Duration% -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
+}
+IfMsgBox No 
+{	
+	Run %ComSpec% /k C:\Temp\bin\ffmpeg -i %vFile% -filter_complex "[0:v]crop=in_w-(in_w/%wBlocks%):in_h-(in_h/%hBlocks%)[cropped]" -map "[cropped]" -map 0:a -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p -c:a copy C:\Temp\%New_File_Name%.mkv
+}
 sleep 1000 ;
 WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
 
@@ -802,7 +791,7 @@ return ;
 			webcamenaudio		= -i %vWebcam% ; input 0 - webcam & audio
 
 		} else {
-			webcamenaudio		= -f dshow -i video="%DDLWebcams%":audio="%DDLItems%" ; input 0 - webcam & audio
+			webcamenaudio		= -f dshow -video_size 640x360 -framerate 24 -i video="%DDLWebcams%":audio="%DDLItems%" ; input 0 - webcam & audio
 		}
 
 		
@@ -825,13 +814,13 @@ return ;
 		if (DDLCodecOptions = "YouTube") {
 			codec 		= -c:v libx265 -crf 20 ;
 		} else {
-			codec 		= -c:v libx264 -r 20 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
+			codec 		= -c:v libx264 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
 		}
 		filtercomplex 		= -filter_complex 
 		volume 			= [0:a]volume=volume=%VolumeBoost% 	; amp volume 
-		scalewebcam 		:= "[0:v]scale=300:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s] It takes output width (ow), divides it by aspect ratio (a), divides by 2, truncates digits after decimal point and multiplies by 2. It guarantees that resulting height is divisible by 2.
+		scalewebcam 		:= "[0:v]scale=200:trunc(ow/a/2)*2[s]" ; scale webcam [0:v]->[s] It takes output width (ow), divides it by aspect ratio (a), divides by 2, truncates digits after decimal point and multiplies by 2. It guarantees that resulting height is divisible by 2.
 		; https://stackoverflow.com/a/14283648
-		overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w):main_h-overlay_h[webcam]" ;overlay webcam [1:v][s]->[v]
+		overlaywebcam 		:= "[1:v][s]overlay=(main_w-overlay_w)-40:main_h-overlay_h-40[webcam]" ;overlay webcam [1:v][s]->[v]
 		overlaybanner 		:= "[2]overlay=(main_w-overlay_w):0[banner]" ; overlay banner [v] -> [banner]
 		if (RecordScreen = 1) {
 			audioMap				:= "[mix]"
