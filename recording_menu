@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
+#Include Rufaydium-Webdriver-RufaydiumV1.7.1\Rufaydium.ahk
 
 selectAudioCable() {
 	
@@ -675,6 +675,9 @@ WinMaximize, ahk_class ConsoleWindowClass ;minimize the CMD window
 
 return ; 
 
+
+
+
 ButtonCropWebcam:
 Gui, Submit ; 
 FileSelectFile, vFile, , c:\Temp ; 
@@ -686,6 +689,12 @@ if ErrorLevel {
 InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
 InputBox, wBlocks,wBlocks, xth blocks from Width?,,300,130 ;Get a file name for your new video
 InputBox, hBlocks, hBlocks, xth blocks from Height?,,300,130 ;Get a file name for your new video
+MsgBox, 4,, Would you like to continue? (press Yes or No)
+IfMsgBox Yes
+    MsgBox You pressed Yes.
+IfMsgBox, No
+    MsgBox You pressed No.
+return ;
 
 MsgBox, 4, , Limit Duration?, 15  ; 5-second timeout.	
 IfMsgBox, Timeout
