@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
+
 
 selectAudioCable() {
 	
@@ -116,7 +116,8 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLItems x201 y62 w300
+;, Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
 Gui Add, DropDownList, vDDLMonitors x511 y62 w150, Primary Monitor||Secondary Monitor|
 Gui Add, DropDownList, vDDLWebcams x675 y62 w160, Integrated Camera||USB Video Device|Microsoft Camera Front|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
@@ -148,6 +149,27 @@ Gui Add, Text, x25 y384 w400 h23, Don't forget to Exit!!
 Gui Add, Button, x201 y343 w159 h30, Test&2
 Gui Font, s13
 Gui Add, Edit, vGenerateText x201 y385 w700 h400, Test&2
+
+ffmpegPath := "c:\temp\bin\ffmpeg.exe"
+outputFile := "c:\temp\ffmpeg_devices3.txt"
+
+
+Run %ComSpec% /k C:\Temp\bin\ffmpeg -list_devices true -f dshow -i dummy > "%outputFile%" 2>&1, hide
+FileRead, Output, %outputFile%
+FileDelete, %outputFile%
+
+StringReplace, Output, Output, `r`n, `n, All
+
+Loop, Parse, Output, `n
+{
+    Device := A_LoopField
+    Device := RegExReplace(Device, ".*\[dshow @ [a-z0-9]+\]  ""(.+)""", "$1")
+    if (RegExMatch(Device, "^\[dshow[^]]+\] ""([^""]+)"" \(audio\)$", match))
+    {
+        DeviceName := match1
+        GuiControl,, DDLItems, %DeviceName%
+    }
+}
 
 
 Gui Show, w920 h820, Window
@@ -777,8 +799,8 @@ return ;
 		Gui, Submit,
 ;MsgBox %ShowBanner%
 	
-		SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
-		SysGet, Mon1, Monitor, 1 ; Get the second monitor"s details
+		SysGet, Mon2, Monitor, 1 ; Get the second monitor"s details
+		SysGet, Mon1, Monitor, 2 ; Get the second monitor"s details
 		Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
 		Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 		W := Mon2Width * 0.5 ;	
