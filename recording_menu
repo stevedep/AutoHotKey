@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-
+#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
 
 selectAudioCable() {
 	
@@ -154,7 +154,7 @@ ffmpegPath := "c:\temp\bin\ffmpeg.exe"
 outputFile := "c:\temp\ffmpeg_devices3.txt"
 
 
-Run %ComSpec% /k C:\Temp\bin\ffmpeg -list_devices true -f dshow -i dummy > "%outputFile%" 2>&1, hide
+Run %ComSpec% /c C:\Temp\bin\ffmpeg -list_devices true -f dshow -i dummy > "%outputFile%" 2>&1, hide
 FileRead, Output, %outputFile%
 FileDelete, %outputFile%
 
@@ -484,7 +484,7 @@ else {
 if (ses.Length() > 0) {		
 	Page := Chrome.getSession(1) 
 } else {
-	Chrome.capabilities.setUserProfile("Default")
+	Chrome.capabilities.setUserProfile("Profile 1")
 	Page := Chrome.NewSession()
 
 }
