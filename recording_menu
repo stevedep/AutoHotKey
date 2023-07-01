@@ -10,7 +10,7 @@ SetWinDelay, 200 ;
 	WinGet, vCount, Count, ahk_class Chrome_WidgetWin_1
 	MsgBox, % vCount
 */
-#Include Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
+#Include C:\Temp\Rufaydium-Webdriver-RufaydiumV1.7.2\Rufaydium.ahk
 
 selectAudioCable() {
 	
@@ -805,7 +805,7 @@ return ;
 		Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 		W := Mon2Width * 0.5 ;	
 
-		generalsettings 	= -y -rtbufsize 1500M 
+		generalsettings 	= -y -rtbufsize 2100M -thread_queue_size 1500000
 		InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
 		
 		if (SelectFiles=1) {			
@@ -836,7 +836,7 @@ return ;
 		if (DDLCodecOptions = "YouTube") {
 			codec 		= -c:v libx265 -crf 20 ;
 		} else {
-			codec 		= -c:v libx264 -preset ultrafast -tune zerolatency -crf 0 -pix_fmt yuv420p ;
+			codec 		= -c:v libx264 -preset slow -crf 5 -g 30 ; -c:v libx264 -preset ultrafast -tune zerolatency -crf 0 -g 1 -pix_fmt yuv420p ;
 		}
 		filtercomplex 		= -filter_complex 
 		volume 			= [0:a]volume=volume=%VolumeBoost% 	; amp volume 
