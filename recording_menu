@@ -147,6 +147,7 @@ Gui Add, Button, x18 y343 w159 h30, &Exit
 Gui Font, s12
 Gui Add, Text, x25 y384 w400 h23, Don't forget to Exit!!
 Gui Add, Button, x201 y343 w159 h30, Test&2
+Gui Add, Button, x380 y343 w159 h30, Test&3
 Gui Font, s13
 Gui Add, Edit, vGenerateText x201 y385 w700 h400, Test&2
 
@@ -211,6 +212,17 @@ Sleep 1000
 ExitApp
 Return
 
+
+
+f1::
+
+Chrome := new Rufaydium("chromedriver.exe")
+; display chrome Status()
+; get sessions 
+sessions = % Chrome.getSessions()
+MsgBox, % sessions.Length()
+
+return
 
 ButtonTest2:
 ; clipboard := "https://youtube.com/embed/" + spl[spl.Length()]
@@ -466,7 +478,7 @@ return
 ButtonUpload:
 Gui, Submit ; 
 Chrome := new Rufaydium("chromedriver.exe")
-ses := Chrome.getSessions()
+ses := % Chrome.getSessions()
 ; msgbox % ses.Length() 
 
 FileSelectFile, vFile ; 
@@ -482,7 +494,7 @@ else {
 
 
 if (ses.Length() > 0) {		
-	Page := Chrome.getSession(1) 
+	Page := % Chrome.getSession(1) 
 } else {
 	Chrome.capabilities.setUserProfile("Profile 1")
 	Page := Chrome.NewSession()
