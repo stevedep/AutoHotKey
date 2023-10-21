@@ -143,17 +143,19 @@ Gui Add, Button, vCropWebcam x720 y263 w100 h30, CropWebcam
 
 Gui Add, Button, x18 y303 w159 h30, &Upload
 Gui Add, Button, x201 y303 w159 h30, &Upload_Stream
-Gui Add, Button, x18 y343 w159 h30, &Exit
+
+
+Gui Add, Button, x18 y343 w159 h30 c87BBFF, &Exit
 Gui Font, s12
 Gui Add, Text, x25 y384 w400 h23, Don't forget to Exit!!
 Gui Add, Button, x201 y343 w159 h30, Test&2
 Gui Add, Button, x380 y343 w159 h30, Test&3
 Gui Font, s13
-Gui Add, Edit, vGenerateText x201 y385 w700 h400, Test&2
+Gui Add, Edit, vGenerateText x201 y385 w700 h400, LET OP! DRUK OP EXIT OM DE EDGE SESSIES TE SLUITEN!
+
 
 ffmpegPath := "c:\temp\bin\ffmpeg.exe"
 outputFile := "c:\temp\ffmpeg_devices3.txt"
-
 
 Run %ComSpec% /c C:\Temp\bin\ffmpeg -list_devices true -f dshow -i dummy > "%outputFile%" 2>&1, hide
 FileRead, Output, %outputFile%
@@ -175,6 +177,7 @@ Loop, Parse, Output, `n
 
 Gui Show, w920 h820, Window
 Return
+
 
 GuiEscape:
 GuiClose:
@@ -205,48 +208,30 @@ return
 ; MsgBox, % vCount
 
 ButtonExit:
-Chrome := new Rufaydium("chromedriver.exe")
+Chrome := new Rufaydium("msedgedriver.exe")
 Chrome.QuitAllSessions() ; close all Page 
 Chrome.Driver.Exit() ; then exits driver
 Sleep 1000
-ExitApp
+; ExitApp
 Return
 
 
 
 f1::
-
-Chrome := new Rufaydium("chromedriver.exe")
-; display chrome Status()
-; get sessions 
-sessions = % Chrome.getSessions()
-MsgBox, % sessions.Length()
-
-return
-
-ButtonTest2:
-; clipboard := "https://youtube.com/embed/" + spl[spl.Length()]
-Chrome := new Rufaydium("chromedriver.exe")
-ses := Chrome.getPages()
- msgbox % ses.Length() 
-if (ses.Length() > 0) {		
-	Page := Chrome.getPage(1) 
-} else {
-	Chrome.capabilities.setUserProfile("Default")
-	Page := Chrome.NewPage()
-}
-
+Gui, Submit ; 
+Chrome := new Rufaydium("msedgedriver.exe")
+Chrome.capabilities.setUserProfile("Default")
+Page := Chrome.NewSession()
 Page.NewTab()	
 Page.Navigate("https://www.protopage.com/stevedep#General/Way_of_working_--%3E")
-Page.ActiveTab()	
-; MsgBox, 4096,, Continue after selecting the right tab, then paste the clipboard into the webpage config
+; Page.ActiveTab()	
 js = 
 (
 var xpath = "//div[text()='Add widgets']";
 var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 matchingElement.parentElement.click()
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 
 js = 
 (
@@ -262,12 +247,6 @@ js =
 		triggerMouseEvent(node, "mousedown")
 )
 Page.CDP.evaluate(js)
-/*
-
-
-while !Page.querySelector("div[id^=new]") ; [0].click()
-	sleep, 500
-*/
 js=
 (
 	function triggerMouseEvent (node, eventType) {
@@ -297,6 +276,7 @@ triggerMouseEvent(node, "mousedown")
 
 )
 Page.CDP.evaluate(js)
+spl := strSplit(clipboard, "/")
 
 url := "https://youtube.com/embed/" + spl[spl.Length()]
 
@@ -305,6 +285,11 @@ js=
 r = document.querySelectorAll("div[id^=new]")
 r[1].querySelector(" div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > input").value = '%url%'
 
+)
+Page.CDP.evaluate(js)
+js=
+(
+document.querySelectorAll("div[id^=new]")[1].querySelector("input[value=Untitled]").value = '%VideoDesc%'
 )
 Page.CDP.evaluate(js)
 
@@ -323,6 +308,25 @@ node.click()
 
 )
 Page.CDP.evaluate(js)
+Gui, show
+return
+
+ButtonTest2:
+Gui, Submit ; 
+; Chrome := new Rufaydium("chromedriver.exe")
+; Chrome := new Rufaydium("msedgedriver.exe")
+; Create an EdgeOptions object with the desired options
+
+; Attach to an existing Edge session
+edge := ComObjCreate("Rufaydium.Edge")
+edge.attach_session("MicrosoftEdge")
+
+; Navigate to a URL in the existing session
+edge.Navigate("https://www.example.com")
+
+; Find an element in the existing session and interact with it
+element := edge.FindElementByCssSelector("#myButton")
+element.Click()
 
 
 gui, show
@@ -477,15 +481,23 @@ return
 
 ButtonUpload:
 Gui, Submit ; 
-Chrome := new Rufaydium("chromedriver.exe")
-ses := % Chrome.getSessions()
+; Chrome := new Rufaydium("chromedriver.exe")
+Chrome := new Rufaydium("msedgedriver.exe")
+
+; ses := % Chrome.getSessions()
 ; msgbox % ses.Length() 
 
 FileSelectFile, vFile ; 
-InputBox, VideoDesc, Video description, Please provide a description, , 640, 100
+; set the selected file name as the default input below
+MsgBox, Script is running up to this point.
+InputBox, VideoDesc, Video description, Please provide a description, Default Description, 640, 100
 if ErrorLevel {
-    MsgBox, CANCEL was pressed.
-	return ; 
+    MsgBox, CANCEL was pressed, using filename
+	; set VideoDesc to the filename that was Selected
+	VideoDesc := vFile
+	MsgBox, using  "%VideoDesc%"
+
+	; return ; 
 }
 else {
     MsgBox, You entered "%VideoDesc%"
@@ -493,13 +505,12 @@ else {
 
 
 
-if (ses.Length() > 0) {		
-	Page := % Chrome.getSession(1) 
-} else {
-	Chrome.capabilities.setUserProfile("Profile 1")
-	Page := Chrome.NewSession()
 
-}
+Chrome.capabilities.setUserProfile("Default")
+; Chrome.capabilities.setUserProfile("Profile 1")
+Page := Chrome.NewSession()
+
+
 
 Page.NewTab()	
 ; navigate to url
@@ -548,7 +559,7 @@ var xpath = "//div[text()='Add widgets']";
 var matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 matchingElement.parentElement.click()
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 
 js = 
 (
@@ -563,7 +574,7 @@ js =
 		var node = matchingElement.closest("div > div")
 		triggerMouseEvent(node, "mousedown")
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 /*
 
 
@@ -583,7 +594,7 @@ node = document.querySelector("div[id^=new]")
 triggerMouseEvent(node.childNodes[0], "mousedown")
 triggerMouseEvent(node.childNodes[0], "mouseup")
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 
 js=
 (
@@ -598,7 +609,7 @@ node = document.querySelector("div[id^=new]").querySelector("a")
 triggerMouseEvent(node, "mousedown")
 
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 spl := strSplit(clipboard, "/")
 
 url := "https://youtube.com/embed/" + spl[spl.Length()]
@@ -609,12 +620,12 @@ r = document.querySelectorAll("div[id^=new]")
 r[1].querySelector(" div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > input").value = '%url%'
 
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 js=
 (
 document.querySelectorAll("div[id^=new]")[1].querySelector("input[value=Untitled]").value = '%VideoDesc%'
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 
 js=
 (
@@ -630,7 +641,7 @@ node = document.querySelectorAll("div[id^=new]")[1].querySelector("div:nth-child
 node.click()
 
 )
-Page.CDP.evaluate(js)
+Page.ExecuteSync(js)
 
 Gui, show
 ; document.getElementById("next-button").click()
@@ -811,8 +822,8 @@ return ;
 		Gui, Submit,
 ;MsgBox %ShowBanner%
 	
-		SysGet, Mon2, Monitor, 1 ; Get the second monitor"s details
-		SysGet, Mon1, Monitor, 2 ; Get the second monitor"s details
+		SysGet, Mon2, Monitor, 2 ; Get the second monitor"s details
+		SysGet, Mon1, Monitor, 1 ; Get the second monitor"s details
 		Mon2Width := Mon2Right - Mon2Left ; Calculate the second monitor"s actual width.
 		Mon2Height := Mon2Bottom - Mon2Top ; Calculate the second monitor"s actual height.
 		W := Mon2Width * 0.5 ;	
