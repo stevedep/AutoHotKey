@@ -107,7 +107,7 @@ selectAudioCable() {
 		Click, 243, 243 Left, Down
 		Sleep, 100
 		Click, 243, 243 Left, Up
-		
+
 }
 
 
@@ -116,8 +116,8 @@ selectAudioCable() {
 
 Gui Add, CheckBox, vShowBanner x24 y62 w120 h23, Show Banner
 Gui Add, CheckBox, vRecordScreen x201 y98 w200 h23, Record Screen Audio (Teams)
-Gui Add, DropDownList, vDDLItems x201 y62 w300
-;, Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)||Headset Microphone (2- Plantronics Blackwire 315.1)|
+;Gui Add, DropDownList, vDDLItems x201 y62 w300, ||Microphone (HyperX QuadCast)|Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)|Headset Microphone (2- Plantronics Blackwire 315.1)|
+Gui Add, DropDownList, vDDLItems x201 y62 w300, Microphone (HyperX QuadCast)||Microphone Array (Realtek High Definition Audio(SST))|Microphone Array (Synaptics Audio)|Headset Microphone (2- Plantronics Blackwire 315.1)
 Gui Add, DropDownList, vDDLMonitors x511 y62 w150, Primary Monitor||Secondary Monitor|
 Gui Add, DropDownList, vDDLWebcams x675 y62 w160, Integrated Camera||USB Video Device|Microsoft Camera Front|
 Gui Add, Text, x530 y92 w150 h20 +0x200, VolumeBoost
@@ -313,20 +313,41 @@ return
 
 ButtonTest2:
 Gui, Submit ; 
-; Chrome := new Rufaydium("chromedriver.exe")
-; Chrome := new Rufaydium("msedgedriver.exe")
-; Create an EdgeOptions object with the desired options
 
-; Attach to an existing Edge session
-edge := ComObjCreate("Rufaydium.Edge")
-edge.attach_session("MicrosoftEdge")
+; Define the PowerShell command you want to run
+psCommand := "docker start upload" ; Example command that gets the current date and time
+; Run the PowerShell command and capture its output
+RunWait, % "powershell -Command " psCommand, , UseErrorLevel, outputVar
+; Define the PowerShell command you want to run
+psCommand := "docker exec -it upload python /app/upload.py --file='/app/testopname.mkv' --title='container upload via docker via AHK' --description='via AHK!! met eerst een copy' --keywords='surfing,Santa Cruz' --category='22' --privacyStatus='private'" ; Example command that gets the current date and time
+; Run the PowerShell command and capture its output
+RunWait, % "powershell -Command " psCommand, , UseErrorLevel, outputVar
+; Use the output in your AHK script
+MsgBox, % "PowerShell command output: " outputVar
+psCommand := "docker stop upload" ; Example command that gets the current date and time
+; Run the PowerShell command and capture its output
+RunWait, % "powershell -Command " psCommand, , UseErrorLevel, outputVar
 
-; Navigate to a URL in the existing session
-edge.Navigate("https://www.example.com")
+Run %ComSpec% /c taskkill /F /IM cmd.exe
 
-; Find an element in the existing session and interact with it
-element := edge.FindElementByCssSelector("#myButton")
-element.Click()
+
+; ; Chrome := new Rufaydium("chromedriver.exe")
+; ; Chrome := new Rufaydium("msedgedriver.exe")
+; ; Create an EdgeOptions object with the desired options
+
+; ; Attach to an existing Edge session
+; edge := ComObjCreate("Rufaydium.Edge")
+; edge.attach_session("MicrosoftEdge")
+
+; ; Navigate to a URL in the existing session
+; edge.Navigate("https://www.example.com")
+
+; ; Find an element in the existing session and interact with it
+; element := edge.FindElementByCssSelector("#myButton")
+; element.Click()
+
+; close all windows with the command line cmd.exe
+
 
 
 gui, show
@@ -770,11 +791,11 @@ return ;
 	Sleep, 300 ; 
 	Send q ; 
 	sleep, 500
-	InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
-	if (New_File_Name = "") or (Error = 1) ;If you don"t give it a name, it won"t rename it and won"t run it
-		return 
+	; ;InputBox, New_File_Name,File name,What would you like to name your video file?,,300,130 ;Get a file name for your new video
+	; if (New_File_Name = "") or (Error = 1) ;If you don"t give it a name, it won"t rename it and won"t run it
+	; 	return 
 	
-	FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
+	; FileMove, c:\Temp\temp.mkv, c:\Temp\%New_File_Name%.mkv  ; Rename the temp file to your new file.
 	Gui, Show
 	if WinExist("Temp ahk_class CabinetWClass") {
 		
@@ -809,6 +830,10 @@ return ;
 		Click, 58, 965 Left, , Up ; assuming full screen
 		Sleep, 900
 		Send, +z
+		; kill the command window 
+		Run %ComSpec% /c taskkill /F /IM cmd.exe
+		; open windows explorer, c:\temp
+		Run, explorer /expand, C:\Temp\
 		
 	}
 	
